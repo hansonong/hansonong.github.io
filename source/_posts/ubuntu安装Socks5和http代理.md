@@ -5,8 +5,8 @@ tags:
   - SOCKS5
   - proxy/代理
 categories:
-  - ：Linux
-  - ：Proxy/代理
+  - Linux
+  - Proxy/代理
 ---
 
 
