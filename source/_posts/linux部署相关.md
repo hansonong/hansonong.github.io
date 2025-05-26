@@ -28,7 +28,7 @@ firewall-cmd --zone=public --list-rich-rules
 ##### 生成密钥
 
 ```shell
-ssh-keygen -t rsa -C topnoah@gmail.com"
+ssh-keygen -t rsa -C "topnoah@gmail.com"
 ```
 
 ##### 复制到Linux服务器
