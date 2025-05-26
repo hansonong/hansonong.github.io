@@ -118,15 +118,15 @@ sudo netstat -tunlp | grep 3128
 
 - SOCKS5 代理可用 curl 测试：
 
-  ```bash
-  curl -x socks5://adu:ADU908google@108.165.40.161:1080 http://ip-api.com/json
-  ```
+```bash
+curl -x socks5://adu:ADU908google@108.165.40.161:1080 http://ip-api.com/json
+```
 
 - HTTP 代理可用 curl 测试：
 
-  ```bash
-  curl -x http://127.0.0.1:3128 http://ip-api.com/json
-  ```
+```bash
+curl -x http://127.0.0.1:3128 http://ip-api.com/json
+```
 
 ---
 
@@ -136,6 +136,3 @@ sudo netstat -tunlp | grep 3128
 - 配置文件语法错误，建议每次修改后检查日志。
 
 ---
-
-如有疑问，欢迎留言交流。
-
