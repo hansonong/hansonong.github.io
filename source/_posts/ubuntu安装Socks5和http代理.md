@@ -9,6 +9,12 @@ categories:
   - ：Proxy/代理
 ---
 
+
+> ubuntu下，使用 Dante 搭建 SOCKS5 代理和 Squid 搭建 HTTP 代理。
+
+
+<!-- more -->
+
 ## 使用 Dante 搭建 SOCKS5 代理
 
 #### 安装 Dante
