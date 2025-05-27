@@ -2,17 +2,20 @@
 title: linux-docker部署项目
 date: 2025-02-07 10:44:01
 tags:
- - Linux
- - Docker
- - Mysql
- - Redis
- - RabbitMQ
- - Java
- - Maven
- - Nginx
- - minio
+  - Linux
+  - Docker
+  - MySQL
+  - Redis
+  - RabbitMQ
+  - Java
+  - Maven
+  - Nginx
+  - MinIO
+  - 环境搭建
+  - 部署教程
 categories:
-    - 服务器部署
+  - 运维部署
+  - 容器与虚拟化
 ---
 
 > Linux Docker部署项目，包括Docker安装、Mysql、Redis、RabbitMQ、Java、Maven、Nginx、minio等环境准备。

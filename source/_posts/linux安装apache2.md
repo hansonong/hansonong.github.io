@@ -1,12 +1,15 @@
 ---
 title: ubuntu(debian) Apache2多端口部署
 tags:
- - ubuntu
- - debian
- - apache2
- - port
+  - Apache2
+  - Ubuntu
+  - Debian
+  - 多端口
+  - 服务器部署
+  - 配置教程
 categories:
- - 服务器部署
+  - 运维部署
+  - 服务器管理
 ---
 
 > Linux Apache2多端口，多项目部署。

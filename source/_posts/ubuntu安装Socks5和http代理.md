@@ -1,12 +1,14 @@
 ---
 title: ubuntu安装SOCKS5和HTTP代理
 tags:
-  - HTTP
   - SOCKS5
-  - proxy/代理
+  - HTTP代理
+  - Dante
+  - Squid
+  - Ubuntu
 categories:
   - Linux
-  - Proxy/代理
+  - 网络代理
 ---
 
 

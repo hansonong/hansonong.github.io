@@ -2,11 +2,13 @@
 title: ubuntu安装mysql
 date: 2025-02-10 15:58:02
 tags:
-    - mysql
-    - ubuntu
+  - MySQL
+  - Ubuntu
+  - 数据库
+  - 安装教程
 categories:
-    - 数据库
-    - 服务器部署
+  - 数据库
+  - 运维部署
 ---
 
 > 本文介绍如何在ubuntu上安装mysql

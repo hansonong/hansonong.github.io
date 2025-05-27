@@ -1,11 +1,14 @@
 ---
 title: Ubuntu安装Docker和docker-compose
 tags:
- - docker
- - docker-compose
- - Ubuntu
+  - Docker
+  - Docker Compose
+  - Ubuntu
+  - 容器化
+  - 安装教程
 categories:
- - 服务器部署
+  - 容器与虚拟化
+  - 运维部署
 ---
 
 > 在 Ubuntu 上安装 Docker 和 Docker Compose，卸载Docker 和 Docker Compose。

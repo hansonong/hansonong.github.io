@@ -1,12 +1,15 @@
 ---
 title: Linux服务器基础设置
 tags:
-  - debian
-  - ubuntu
-  - port
-  - ssh
+  - Linux
+  - Ubuntu
+  - Debian
+  - SSH
+  - 防火墙
+  - 端口管理
 categories:
-  - 服务器部署
+  - 运维部署
+  - 服务器管理
 ---
 
 > 设置端口允许IP访问，免密登录，端口占用查询。

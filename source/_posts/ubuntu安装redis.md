@@ -1,12 +1,14 @@
 ---
 title: ubuntu安装redis
 date: 2025-02-09 12:43:25
-tags: 
- - ubuntu
- - redis
-
+tags:
+  - Redis
+  - Ubuntu
+  - 数据库
+  - 安装教程
 categories:
- - 服务器部署
+  - 数据库
+  - 运维部署
 ---
 
 > ubuntu安装redis
