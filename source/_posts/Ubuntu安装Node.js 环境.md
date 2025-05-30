@@ -10,6 +10,10 @@ categories:
   - 前端
 ---
 
+> 本文介绍如何在 Ubuntu 上安装 Node.js 环境，包括 Node.js、npm 和 pnpm 的安装步骤。
+
+<!-- more -->
+
 ## 1. 更新系统
 
 ```bash
