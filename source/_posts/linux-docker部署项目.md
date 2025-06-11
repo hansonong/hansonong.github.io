@@ -76,9 +76,9 @@ java --version
 
 ### 安装 Maven
 ```shell
-wget https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz
-tar -zxvf apache-maven-3.9.9-bin.tar.gz
-mv apache-maven-3.9.9 /opt/
+wget https://dlcdn.apache.org/maven/maven-3/3.9.10/binaries/apache-maven-3.9.10-bin.tar.gz
+tar -zxvf apache-maven-3.9.10-bin.tar.gz
+mv apache-maven-3.9.10 /opt/
 ```
 
 ### 安装 Nginx
