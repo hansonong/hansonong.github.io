@@ -46,6 +46,23 @@ docker run -d  --name redis --restart=always -p 6379:6379 redis --requirepass "p
 ```shell
 docker run -d --name rabbitmq --restart=always -p 15672:15672 -p 5672:5672 rabbitmq:latest
 ```
+安装好rabbitmq后，启用延时插件
+- 下载插件
+```shell
+curl -LO https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v4.1.0/rabbitmq_delayed_message_exchange-4.1.0.ez
+```
+- 拷贝插件到RabbitMQ的插件目录
+```shell
+docker cp rabbitmq_delayed_message_exchange-4.1.0.ez rabbitmq:/opt/rabbitmq/plugins/
+```
+- 查看插件列表
+```shell
+rabbitmq-plugins list
+```
+- 启用插件
+```shell
+rabbitmq-plugins enable rabbitmq_delayed_message_exchange
+```
 
 ### 安装 Java
 ```shell
