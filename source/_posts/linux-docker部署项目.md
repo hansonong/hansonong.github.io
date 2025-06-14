@@ -32,6 +32,13 @@ sudo apt update
 sudo apt install docker-ce docker-ce-cli containerd.io
 ```
 
+### 安装docker-compose
+```shell
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose --version
+```
+
 ### 安装 Docker Mysql
 ```shell
 docker run -d --name mysql --restart=always -p 3306:3306 -e MYSQL_ROOT_PASSWORD=poiu0987  mysql:latest
@@ -85,9 +92,4 @@ mv apache-maven-3.9.10 /opt/
 ```shell
 sudo apt update
 sudo apt install nginx
-```
-
-### 安装 minio
-```shell
-docker run -d --name minio --restart=always -p 9000:9000
 ```
