@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#CD5C5C"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/snake.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/snake.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/snake.png">
+  <link rel="mask-icon" href="/images/snake.png" color="#CD5C5C">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"topnoah.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.22.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":true,"show_result":true,"line_number":true,"style":"mac"},"fold":{"enable":true,"height":500},"bookmark":{"enable":true,"color":"#008080","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Linux Apache2多端口，多项目部署。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ubuntu(debian) Apache2多端口部署">
+<meta property="og:url" content="https://topnoah.github.io/2025/06/15/linux%E5%AE%89%E8%A3%85apache2/index.html">
+<meta property="og:site_name" content="HANSON ONG">
+<meta property="og:description" content="Linux Apache2多端口，多项目部署。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-06-14T22:35:27.668Z">
+<meta property="article:modified_time" content="2025-06-14T22:35:27.668Z">
+<meta property="article:author" content="hanson">
+<meta property="article:tag" content="Apache2">
+<meta property="article:tag" content="Ubuntu">
+<meta property="article:tag" content="Debian">
+<meta property="article:tag" content="多端口">
+<meta property="article:tag" content="服务器部署">
+<meta property="article:tag" content="配置教程">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://topnoah.github.io/2025/06/15/linux%E5%AE%89%E8%A3%85apache2/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://topnoah.github.io/2025/06/15/linux%E5%AE%89%E8%A3%85apache2/","path":"2025/06/15/linux安装apache2/","title":"ubuntu(debian) Apache2多端口部署"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ubuntu(debian) Apache2多端口部署 | HANSON ONG</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">HANSON ONG</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-folder-open fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Linux-Apache2%E5%A4%9A%E7%AB%AF%E5%8F%A3%E9%83%A8%E7%BD%B2"><span class="nav-number">1.</span> <span class="nav-text">Linux Apache2多端口部署</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Apache2"><span class="nav-number">1.1.</span> <span class="nav-text">安装Apache2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%BE%E5%88%B0ports-conf%E6%96%87%E4%BB%B6"><span class="nav-number">1.2.</span> <span class="nav-text">找到ports.conf文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E8%BE%91ports-conf%E6%96%87%E4%BB%B6"><span class="nav-number">1.3.</span> <span class="nav-text">编辑ports.conf文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E7%AB%AF%E5%8F%A3%EF%BC%8C%E5%A6%82%E4%B8%8B"><span class="nav-number">1.4.</span> <span class="nav-text">添加端口，如下</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E7%AB%99%E7%82%B9%EF%BC%88sites-available%EF%BC%89"><span class="nav-number">1.5.</span> <span class="nav-text">添加站点（sites.available）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E5%90%AFApache2%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.6.</span> <span class="nav-text">重启Apache2服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%B8%E8%BD%BDapache2"><span class="nav-number">1.7.</span> <span class="nav-text">卸载apache2</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">hanson</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://topnoah.github.io/2025/06/15/linux%E5%AE%89%E8%A3%85apache2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="hanson">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HANSON ONG">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ubuntu(debian) Apache2多端口部署 | HANSON ONG">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ubuntu(debian) Apache2多端口部署
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-06-15 06:35:27" itemprop="dateCreated datePublished" datetime="2025-06-15T06:35:27+08:00">2025-06-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4%E9%83%A8%E7%BD%B2/" itemprop="url" rel="index"><span itemprop="name">运维部署</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4%E9%83%A8%E7%BD%B2/%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">服务器管理</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>Linux Apache2多端口，多项目部署。</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="Linux-Apache2多端口部署"><a href="#Linux-Apache2多端口部署" class="headerlink" title="Linux Apache2多端口部署"></a>Linux Apache2多端口部署</h3><h4 id="安装Apache2"><a href="#安装Apache2" class="headerlink" title="安装Apache2"></a>安装Apache2</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install apache2</span><br></pre></td></tr></table></figure>
+
+<h4 id="找到ports-conf文件"><a href="#找到ports-conf文件" class="headerlink" title="找到ports.conf文件"></a>找到ports.conf文件</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /etc/apache2</span><br><span class="line">ls</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@nine:~# cd /etc/apache2/</span><br><span class="line">root@nine:/etc/apache2# ls</span><br><span class="line">apache2.conf    conf-enabled  magic           mods-enabled  sites-available</span><br><span class="line">conf-available  envvars       mods-available  ports.conf    sites-enabled</span><br></pre></td></tr></table></figure>
+
+<h4 id="编辑ports-conf文件"><a href="#编辑ports-conf文件" class="headerlink" title="编辑ports.conf文件"></a>编辑ports.conf文件</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim ports.conf</span><br></pre></td></tr></table></figure>
+
+<h4 id="添加端口，如下"><a href="#添加端口，如下" class="headerlink" title="添加端口，如下"></a>添加端口，如下</h4><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># If you just change the port or add more ports here, you will likely also</span></span><br><span class="line"><span class="comment"># have to change the VirtualHost statement in</span></span><br><span class="line"><span class="comment"># /etc/apache2/sites-enabled/000-default.conf</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># sports-memory</span></span><br><span class="line"><span class="attribute">Listen</span> <span class="number">23106</span></span><br><span class="line"><span class="comment"># blog</span></span><br><span class="line"><span class="attribute">Listen</span> <span class="number">23107</span></span><br><span class="line"><span class="comment"># wprdpress</span></span><br><span class="line"><span class="attribute">Listen</span> <span class="number">23108</span></span><br><span class="line"></span><br><span class="line"><span class="section">&lt;IfModule ssl_module&gt;</span></span><br><span class="line">        <span class="attribute">Listen</span> <span class="number">443</span></span><br><span class="line"><span class="section">&lt;/IfModule&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="section">&lt;IfModule mod_gnutls.c&gt;</span></span><br><span class="line">        <span class="attribute">Listen</span> <span class="number">443</span></span><br><span class="line"><span class="section">&lt;/IfModule&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># vim: syntax=apache ts=4 sw=4 sts=4 sr noet</span></span><br><span class="line">~                                                                                                           ~     </span><br></pre></td></tr></table></figure>
+
+<p>添加后，保存退出（<code>:wq</code>）</p>
+<h4 id="添加站点（sites-available）"><a href="#添加站点（sites-available）" class="headerlink" title="添加站点（sites.available）"></a>添加站点（sites.available）</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd sites-available/</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@nine:/etc/apache2# cd sites-available/</span><br><span class="line">root@nine:/etc/apache2/sites-available# ls</span><br><span class="line">000-default.conf  default-ssl.conf</span><br></pre></td></tr></table></figure>
+
+<p>编辑站点</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim 000-default.conf</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">&lt;VirtualHost *<span class="number">:23106</span>&gt;</span></span><br><span class="line">        <span class="attribute">ServerAdmin</span> webmaster@localhost</span><br><span class="line">        <span class="attribute">DocumentRoot</span> /var/www/html</span><br><span class="line">        <span class="attribute">ErrorLog</span> <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/error.log</span><br><span class="line">        <span class="attribute">CustomLog</span> <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/access.log combined</span><br><span class="line"><span class="section">&lt;/VirtualHost&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="section">&lt;VirtualHost *<span class="number">:23107</span>&gt;</span></span><br><span class="line">        <span class="attribute">ServerAdmin</span> webmaster2@localhost</span><br><span class="line">        <span class="attribute">DocumentRoot</span> /var/www/blog/dist</span><br><span class="line">        <span class="attribute">ErrorLog</span> <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/error.log</span><br><span class="line">        <span class="attribute">CustomLog</span> <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/access.log combined</span><br><span class="line"><span class="section">&lt;/VirtualHost&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="section">&lt;VirtualHost *<span class="number">:23108</span>&gt;</span></span><br><span class="line">        <span class="attribute">ServerAdmin</span> webmaster3@localhost</span><br><span class="line">        <span class="attribute">DocumentRoot</span> /var/www/wordpress</span><br><span class="line">        <span class="attribute">ErrorLog</span> <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/error.log</span><br><span class="line">        <span class="attribute">CustomLog</span> <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/access.log combined</span><br><span class="line"><span class="section">&lt;/VirtualHost&gt;</span></span><br></pre></td></tr></table></figure>
+<p>编辑完成后，保存退出（<code>:wq</code>）</p>
+<h4 id="重启Apache2服务"><a href="#重启Apache2服务" class="headerlink" title="重启Apache2服务"></a>重启Apache2服务</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart apache2</span><br></pre></td></tr></table></figure>
+
+<h4 id="卸载apache2"><a href="#卸载apache2" class="headerlink" title="卸载apache2"></a>卸载apache2</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt remove apache2</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Apache2/" rel="tag"># Apache2</a>
+              <a href="/tags/Ubuntu/" rel="tag"># Ubuntu</a>
+              <a href="/tags/Debian/" rel="tag"># Debian</a>
+              <a href="/tags/%E5%A4%9A%E7%AB%AF%E5%8F%A3/" rel="tag"># 多端口</a>
+              <a href="/tags/%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%83%A8%E7%BD%B2/" rel="tag"># 服务器部署</a>
+              <a href="/tags/%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/" rel="tag"># 配置教程</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/06/15/linux%E9%83%A8%E7%BD%B2%E7%9B%B8%E5%85%B3/" rel="prev" title="Linux服务器基础设置">
+                  <i class="fa fa-angle-left"></i> Linux服务器基础设置
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">hanson</span>
+  </div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

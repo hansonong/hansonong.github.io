@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#CD5C5C"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/snake.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/snake.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/snake.png">
+  <link rel="mask-icon" href="/images/snake.png" color="#CD5C5C">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"topnoah.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.22.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":true,"show_result":true,"line_number":true,"style":"mac"},"fold":{"enable":true,"height":500},"bookmark":{"enable":true,"color":"#008080","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="ubuntu安装rabbitMQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ubuntu安装rabbitMQ">
+<meta property="og:url" content="https://topnoah.github.io/2025/02/09/ubuntu%E5%AE%89%E8%A3%85rabbitMQ/index.html">
+<meta property="og:site_name" content="HANSON ONG">
+<meta property="og:description" content="ubuntu安装rabbitMQ">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-02-09T08:54:51.000Z">
+<meta property="article:modified_time" content="2025-06-14T22:35:27.668Z">
+<meta property="article:author" content="hanson">
+<meta property="article:tag" content="RabbitMQ">
+<meta property="article:tag" content="Ubuntu">
+<meta property="article:tag" content="安装教程">
+<meta property="article:tag" content="消息队列">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://topnoah.github.io/2025/02/09/ubuntu%E5%AE%89%E8%A3%85rabbitMQ/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://topnoah.github.io/2025/02/09/ubuntu%E5%AE%89%E8%A3%85rabbitMQ/","path":"2025/02/09/ubuntu安装rabbitMQ/","title":"ubuntu安装rabbitMQ"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ubuntu安装rabbitMQ | HANSON ONG</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">HANSON ONG</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-folder-open fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85RabbitMQ"><span class="nav-number">1.</span> <span class="nav-text">安装RabbitMQ</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%E8%BD%AF%E4%BB%B6%E5%8C%85%E5%88%97%E8%A1%A8"><span class="nav-number">1.1.</span> <span class="nav-text">更新软件包列表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-Erlang%EF%BC%88RabbitMQ-%E7%9A%84%E4%BE%9D%E8%B5%96%E9%A1%B9%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">安装 Erlang（RabbitMQ 的依赖项）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0-RabbitMQ-%E4%BB%93%E5%BA%93"><span class="nav-number">1.3.</span> <span class="nav-text">添加 RabbitMQ 仓库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-RabbitMQ"><span class="nav-number">1.4.</span> <span class="nav-text">安装 RabbitMQ</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%AF%E7%94%A8%E5%B9%B6%E5%90%AF%E5%8A%A8-RabbitMQ-%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.5.</span> <span class="nav-text">启用并启动 RabbitMQ 服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A3%80%E6%9F%A5-RabbitMQ-%E7%9A%84%E7%8A%B6%E6%80%81"><span class="nav-number">1.6.</span> <span class="nav-text">检查 RabbitMQ 的状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%AF%E7%94%A8RabbitMQ%E7%AE%A1%E7%90%86%E6%8F%92%E4%BB%B6"><span class="nav-number">1.7.</span> <span class="nav-text">启用RabbitMQ管理插件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE-RabbitMQ-%E7%9A%84%E7%AE%A1%E7%90%86%E7%94%A8%E6%88%B7"><span class="nav-number">1.8.</span> <span class="nav-text">设置 RabbitMQ 的管理用户</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-RabbitMQ-%E7%AB%AF%E5%8F%A3%E5%8F%B7"><span class="nav-number">1.9.</span> <span class="nav-text">修改 RabbitMQ 端口号</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">hanson</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">35</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://topnoah.github.io/2025/02/09/ubuntu%E5%AE%89%E8%A3%85rabbitMQ/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="hanson">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HANSON ONG">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ubuntu安装rabbitMQ | HANSON ONG">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ubuntu安装rabbitMQ
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-02-09 16:54:51" itemprop="dateCreated datePublished" datetime="2025-02-09T16:54:51+08:00">2025-02-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-06-15 06:35:27" itemprop="dateModified" datetime="2025-06-15T06:35:27+08:00">2025-06-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">消息中间件</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/%E8%BF%90%E7%BB%B4%E9%83%A8%E7%BD%B2/" itemprop="url" rel="index"><span itemprop="name">运维部署</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>ubuntu安装rabbitMQ</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="安装RabbitMQ"><a href="#安装RabbitMQ" class="headerlink" title="安装RabbitMQ"></a>安装RabbitMQ</h3><h4 id="更新软件包列表"><a href="#更新软件包列表" class="headerlink" title="更新软件包列表"></a>更新软件包列表</h4><p>首先，确保系统包列表是最新的</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br></pre></td></tr></table></figure>
+
+<h4 id="安装-Erlang（RabbitMQ-的依赖项）"><a href="#安装-Erlang（RabbitMQ-的依赖项）" class="headerlink" title="安装 Erlang（RabbitMQ 的依赖项）"></a>安装 Erlang（RabbitMQ 的依赖项）</h4><p>RabbitMQ 是使用 Erlang 编写的，因此需要安装 Erlang</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install erlang</span><br></pre></td></tr></table></figure>
+
+<h4 id="添加-RabbitMQ-仓库"><a href="#添加-RabbitMQ-仓库" class="headerlink" title="添加 RabbitMQ 仓库"></a>添加 RabbitMQ 仓库</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;deb https://dl.bintray.com/rabbitmq/debian bionic main&quot; | sudo tee /etc/apt/sources.list.d/bintray.rabbitmq.list</span><br></pre></td></tr></table></figure>
+
+<p>添加 RabbitMQ 公钥</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc | sudo apt-key add -</span><br></pre></td></tr></table></figure>
+
+<p>再次更新软件包列表</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br></pre></td></tr></table></figure>
+
+<h4 id="安装-RabbitMQ"><a href="#安装-RabbitMQ" class="headerlink" title="安装 RabbitMQ"></a>安装 RabbitMQ</h4><p>使用以下命令安装 RabbitMQ</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install rabbitmq-server</span><br></pre></td></tr></table></figure>
+
+<h4 id="启用并启动-RabbitMQ-服务"><a href="#启用并启动-RabbitMQ-服务" class="headerlink" title="启用并启动 RabbitMQ 服务"></a>启用并启动 RabbitMQ 服务</h4><p>启用 RabbitMQ 服务并在系统启动时启动它</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl enable rabbitmq-server</span><br><span class="line">sudo systemctl start rabbitmq-server</span><br></pre></td></tr></table></figure>
+
+<h4 id="检查-RabbitMQ-的状态"><a href="#检查-RabbitMQ-的状态" class="headerlink" title="检查 RabbitMQ 的状态"></a>检查 RabbitMQ 的状态</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl status rabbitmq-server</span><br></pre></td></tr></table></figure>
+
+<h4 id="启用RabbitMQ管理插件"><a href="#启用RabbitMQ管理插件" class="headerlink" title="启用RabbitMQ管理插件"></a>启用RabbitMQ管理插件</h4><p>RabbitMQ提供了一个Web管理界面，可以通过以下命令启用：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo rabbitmq-plugins enable rabbitmq_management</span><br></pre></td></tr></table></figure>
+
+<h4 id="设置-RabbitMQ-的管理用户"><a href="#设置-RabbitMQ-的管理用户" class="headerlink" title="设置 RabbitMQ 的管理用户"></a>设置 RabbitMQ 的管理用户</h4><p>使用以下命令设置 RabbitMQ 的管理用户</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo rabbitmqctl add_user admin password</span><br></pre></td></tr></table></figure>
+
+<p>设置用户标签</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo rabbitmqctl set_user_tags admin administrator</span><br></pre></td></tr></table></figure>
+
+<p>设置权限</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo rabbitmqctl set_permissions -p / admin &quot;.*&quot; &quot;.*&quot; &quot;.*&quot;</span><br></pre></td></tr></table></figure>
+
+<h4 id="修改-RabbitMQ-端口号"><a href="#修改-RabbitMQ-端口号" class="headerlink" title="修改 RabbitMQ 端口号"></a>修改 RabbitMQ 端口号</h4><p>默认情况下，RabbitMQ 使用 5672 端口。如果需要更改端口号，请编辑配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo nano /etc/rabbitmq/rabbitmq.conf</span><br></pre></td></tr></table></figure>
+
+<p>在文件中添加以下行，将端口号更改为 5673</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">监听端口</span></span><br><span class="line">listeners.tcp.port = 5673</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">管理界面端口</span></span><br><span class="line">management.tcp.port = 15673</span><br></pre></td></tr></table></figure>
+
+<p>通过以上步骤，您将在 Ubuntu 系统上安装并运行 RabbitMQ。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RabbitMQ/" rel="tag"># RabbitMQ</a>
+              <a href="/tags/Ubuntu/" rel="tag"># Ubuntu</a>
+              <a href="/tags/%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/" rel="tag"># 安装教程</a>
+              <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" rel="tag"># 消息队列</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/02/09/ubuntu%E5%AE%89%E8%A3%85redis/" rel="prev" title="ubuntu安装redis">
+                  <i class="fa fa-angle-left"></i> ubuntu安装redis
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2025/02/10/ubuntu%E5%AE%89%E8%A3%85mysql/" rel="next" title="ubuntu安装mysql">
+                  ubuntu安装mysql <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">hanson</span>
+  </div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
