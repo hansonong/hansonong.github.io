@@ -19,6 +19,10 @@ slmgr -skms kms.0t.net.cn
 slmgr -ato
 ```
 
+<!-- more -->
+
+
+
 ---
 
 ## 二、重置 Microsoft Store
