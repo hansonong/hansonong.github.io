@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#CD5C5C"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/snake.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/snake.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/snake.png">
+  <link rel="mask-icon" href="/images/snake.png" color="#CD5C5C">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"topnoah.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.22.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":true,"show_result":true,"line_number":true,"style":"mac"},"fold":{"enable":true,"height":500},"bookmark":{"enable":true,"color":"#008080","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文总结了 Linux 环境下，日常运维中最常用的命令，涵盖了系统状态、文件管理、网络排查、进程管理以及服务权限等方面内容。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux常见运维命令">
+<meta property="og:url" content="https://topnoah.github.io/2026/04/28/linux%E5%B8%B8%E8%A7%81%E8%BF%90%E7%BB%B4%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:site_name" content="HANSON ONG">
+<meta property="og:description" content="本文总结了 Linux 环境下，日常运维中最常用的命令，涵盖了系统状态、文件管理、网络排查、进程管理以及服务权限等方面内容。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-04-28T07:36:10.687Z">
+<meta property="article:modified_time" content="2026-04-28T07:38:53.315Z">
+<meta property="article:author" content="hanson">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="运维">
+<meta property="article:tag" content="常用命令">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://topnoah.github.io/2026/04/28/linux%E5%B8%B8%E8%A7%81%E8%BF%90%E7%BB%B4%E5%91%BD%E4%BB%A4/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://topnoah.github.io/2026/04/28/linux%E5%B8%B8%E8%A7%81%E8%BF%90%E7%BB%B4%E5%91%BD%E4%BB%A4/","path":"2026/04/28/linux常见运维命令/","title":"Linux常见运维命令"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Linux常见运维命令 | HANSON ONG</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">HANSON ONG</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-folder-open fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%B3%BB%E7%BB%9F%E7%8A%B6%E6%80%81%E4%B8%8E%E6%80%A7%E8%83%BD%E6%9F%A5%E7%9C%8B"><span class="nav-number">1.</span> <span class="nav-text">1. 系统状态与性能查看</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%96%87%E4%BB%B6%E4%B8%8E%E7%9B%AE%E5%BD%95%E6%93%8D%E4%BD%9C"><span class="nav-number">2.</span> <span class="nav-text">2. 文件与目录操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%96%87%E4%BB%B6%E6%9F%A5%E7%9C%8B%E4%B8%8E%E5%86%85%E5%AE%B9%E6%A3%80%E7%B4%A2"><span class="nav-number">3.</span> <span class="nav-text">3. 文件查看与内容检索</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%BF%9B%E7%A8%8B%E4%B8%8E%E6%9C%8D%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">4. 进程与服务管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E7%BD%91%E7%BB%9C%E8%BF%9E%E6%8E%A5%E4%B8%8E%E6%8E%92%E6%9F%A5"><span class="nav-number">5.</span> <span class="nav-text">5. 网络连接与排查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E7%94%A8%E6%88%B7%E4%B8%8E%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86"><span class="nav-number">6.</span> <span class="nav-text">6. 用户与权限管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E7%B3%BB%E7%BB%9F%E6%97%A5%E5%BF%97%E6%9F%A5%E7%9C%8B"><span class="nav-number">7.</span> <span class="nav-text">7. 系统日志查看</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93%E4%B8%8E%E4%B8%8B%E8%BD%BD"><span class="nav-number">8.</span> <span class="nav-text">8. 文件传输与下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1-Crontab"><span class="nav-number">9.</span> <span class="nav-text">9. 计划任务 (Crontab)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-%E9%98%B2%E7%81%AB%E5%A2%99%E5%9F%BA%E7%A1%80%E7%AE%A1%E7%90%86"><span class="nav-number">10.</span> <span class="nav-text">10. 防火墙基础管理</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">hanson</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">48</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://topnoah.github.io/2026/04/28/linux%E5%B8%B8%E8%A7%81%E8%BF%90%E7%BB%B4%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="hanson">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HANSON ONG">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Linux常见运维命令 | HANSON ONG">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux常见运维命令
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2026-04-28 15:36:10 / 修改时间：15:38:53" itemprop="dateCreated datePublished" datetime="2026-04-28T15:36:10+08:00">2026-04-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4%E9%83%A8%E7%BD%B2/" itemprop="url" rel="index"><span itemprop="name">运维部署</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4%E9%83%A8%E7%BD%B2/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>本文总结了 Linux 环境下，日常运维中最常用的命令，涵盖了系统状态、文件管理、网络排查、进程管理以及服务权限等方面内容。</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="1-系统状态与性能查看"><a href="#1-系统状态与性能查看" class="headerlink" title="1. 系统状态与性能查看"></a>1. 系统状态与性能查看</h3><p>排查服务器性能和运行情况时最常用的指令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看系统整体运行状态（CPU负载、内存、进程信息等）</span></span><br><span class="line">top </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">退出 top 按 <span class="string">&#x27;q&#x27;</span></span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看内存使用情况（-h 表示以较为易读的 M/G 格式显示）</span></span><br><span class="line">free -h</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看磁盘空间挂载及使用情况</span></span><br><span class="line">df -h</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">统计目录或文件占用的磁盘空间大小（-s 汇总，-h 易读格式）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">例如查看当前目录总大小</span></span><br><span class="line">du -sh *</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看系统内核版本、主机名等信息</span></span><br><span class="line">uname -a</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看 Linux 发行版信息</span></span><br><span class="line">cat /etc/os-release</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-文件与目录操作"><a href="#2-文件与目录操作" class="headerlink" title="2. 文件与目录操作"></a>2. 文件与目录操作</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看当前所在路径</span></span><br><span class="line">pwd</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">列表展示目录内容（-l 详细信息，-a 包含隐藏文件，-h 文件大小易读）</span></span><br><span class="line">ls -lah</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建单层或多层目录</span></span><br><span class="line">mkdir -p /path/to/directory</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">复制文件或目录（-r 递归复制目录）</span></span><br><span class="line">cp -r /source/path /destination/path</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">移动文件或重命名</span></span><br><span class="line">mv /old/name /new/name</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">删除文件或目录（-r 递归，-f 强制不提示，注意慎用 <span class="built_in">rm</span> -rf）</span></span><br><span class="line">rm -rf /path/to/remove</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查找文件（按名称）</span></span><br><span class="line">find / -name &quot;filename.txt&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">压缩和解压缩 tar.gz 文件</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">打包并压缩</span></span><br><span class="line">tar -czvf archive.tar.gz /path/to/dir</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">解压文件</span></span><br><span class="line">tar -xzvf archive.tar.gz</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-文件查看与内容检索"><a href="#3-文件查看与内容检索" class="headerlink" title="3. 文件查看与内容检索"></a>3. 文件查看与内容检索</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看所有文件内容（适合小文件）</span></span><br><span class="line">cat filename.txt</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">分页查看文件内容（适合大文件）</span></span><br><span class="line">less filename.txt</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看文件尾部的 100 行（常用于查看最新日志）</span></span><br><span class="line">tail -n 100 filename.txt</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">实时监控文件尾部的新增内容</span></span><br><span class="line">tail -f filename.log</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在文件中检索关键字（-i 忽略大小写，-n 显示行号）</span></span><br><span class="line">grep -in &quot;keyword&quot; filename.txt</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">配合管道符检索进程或动态数据</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">例如在所有进程中搜索 nginx</span></span><br><span class="line">ps -ef | grep nginx</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-进程与服务管理"><a href="#4-进程与服务管理" class="headerlink" title="4. 进程与服务管理"></a>4. 进程与服务管理</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看所有正在运行的系统进程详细信息</span></span><br><span class="line">ps -ef </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或</span></span><br><span class="line">ps aux</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">杀死指定 PID 的进程</span></span><br><span class="line">kill &lt;PID&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">强制杀死进程</span></span><br><span class="line">kill -9 &lt;PID&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">后台运行命令，且退出终端不中断</span></span><br><span class="line">nohup command &amp;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">systemd 服务管理（以 nginx 为例）</span></span><br><span class="line">systemctl start nginx    # 启动</span><br><span class="line">systemctl stop nginx     # 停止</span><br><span class="line">systemctl restart nginx  # 重启</span><br><span class="line">systemctl status nginx   # 查看状态</span><br><span class="line">systemctl enable nginx   # 设置开机自启</span><br><span class="line">systemctl disable nginx  # 取消开机自启</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-网络连接与排查"><a href="#5-网络连接与排查" class="headerlink" title="5. 网络连接与排查"></a>5. 网络连接与排查</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看网络接口配置和 IP 地址</span></span><br><span class="line">ip a</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">旧版系统可能使用 ifconfig</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查网络连通性</span></span><br><span class="line">ping google.com</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查本地端口占用及网络连接状态（常用组合：-tuln 查监听端口）</span></span><br><span class="line">ss -tuln</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或使用 netstat</span></span><br><span class="line">netstat -tulnp</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看指定端口被哪个进程占用（极其常用）</span></span><br><span class="line">lsof -i :8080</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或结合 netstat / ss 进行过滤查看</span></span><br><span class="line">netstat -tunlp | grep 8080</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">测试目标主机的指定端口是否开放</span></span><br><span class="line">telnet &lt;IP&gt; &lt;Port&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">命令行模拟 HTTP 请求（测试 Web 接口）</span></span><br><span class="line">curl -I http://localhost</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-用户与权限管理"><a href="#6-用户与权限管理" class="headerlink" title="6. 用户与权限管理"></a>6. 用户与权限管理</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加新用户</span></span><br><span class="line">sudo useradd username</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改用户密码</span></span><br><span class="line">sudo passwd username</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更改文件或目录的拥有者（Owner:Group）</span></span><br><span class="line">sudo chown -R user:group /path/to/directory</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更改文件或目录权限</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">777 为最高权限（慎用），一般文件 644，目录 755</span></span><br><span class="line">sudo chmod 755 /path/to/file_or_dir</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">切换用户</span></span><br><span class="line">su - username</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-系统日志查看"><a href="#7-系统日志查看" class="headerlink" title="7. 系统日志查看"></a>7. 系统日志查看</h3><p>排查问题首选的参考凭据：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看系统内核及硬件日志</span></span><br><span class="line">dmesg</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">跟踪查看系统消息日志（Debian/Ubuntu）</span></span><br><span class="line">tail -f /var/log/syslog</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">跟踪查看系统消息日志（CentOS/RHEL）</span></span><br><span class="line">tail -f /var/log/messages</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用 journalctl 查看所有 systemd 服务的日志</span></span><br><span class="line">journalctl -xe</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查阅特定服务的日志记录（例：sshd）</span></span><br><span class="line">journalctl -u sshd</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-文件传输与下载"><a href="#8-文件传输与下载" class="headerlink" title="8. 文件传输与下载"></a>8. 文件传输与下载</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">远程复制文件到本地（若要上传则对调本地与远程路径）</span></span><br><span class="line">scp user@remote_IP:/remote/path/file.txt /local/path/</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">递归传输整个目录</span></span><br><span class="line">scp -r /local/path/dir user@remote_IP:/remote/path/</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">增量同步文件/目录（非常适合备份；-a 归档，-v 详细，-z 压缩传输）</span></span><br><span class="line">rsync -avz /local/path/ user@remote_IP:/remote/path/</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在终端下载网络资源</span></span><br><span class="line">wget https://example.com/file.zip</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">支持断点续传的下载</span></span><br><span class="line">wget -c https://example.com/file.zip</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-计划任务-Crontab"><a href="#9-计划任务-Crontab" class="headerlink" title="9. 计划任务 (Crontab)"></a>9. 计划任务 (Crontab)</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编辑当前用户的定时任务</span></span><br><span class="line">crontab -e</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">列出当前用户的定时任务</span></span><br><span class="line">crontab -l</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">【补充】crontab 书写规范示例（分 时 日 月 周 命令）：</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">每天凌晨 2 点执行脚本</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">0 2 * * * /bin/bash /path/to/script.sh &gt;&gt; /path/to/log.log 2&gt;&amp;1</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="10-防火墙基础管理"><a href="#10-防火墙基础管理" class="headerlink" title="10. 防火墙基础管理"></a>10. 防火墙基础管理</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--- Ubuntu/Debian 系 (UFW) ---</span></span><br><span class="line">sudo ufw status                # 查看防火墙状态及规则</span><br><span class="line">sudo ufw enable                # 启用防火墙</span><br><span class="line">sudo ufw allow 80/tcp          # 放行 80 端口 (TCP 协议)</span><br><span class="line">sudo ufw delete allow 80/tcp   # 删除放行规则</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--- CentOS/RHEL 系 (firewalld) ---</span></span><br><span class="line">sudo firewall-cmd --state      # 查看运行状态</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">永久放行 8080 端口</span></span><br><span class="line">sudo firewall-cmd --zone=public --add-port=8080/tcp --permanent </span><br><span class="line">sudo firewall-cmd --reload     # 重载防火墙使配置生效</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/tags/%E8%BF%90%E7%BB%B4/" rel="tag"># 运维</a>
+              <a href="/tags/%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" rel="tag"># 常用命令</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/04/28/linux-docker%E5%B8%B8%E7%94%A8%E8%BF%90%E7%BB%B4%E5%91%BD%E4%BB%A4/" rel="prev" title="Linux Docker常见运维命令">
+                  <i class="fa fa-angle-left"></i> Linux Docker常见运维命令
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2026/05/09/ubuntu%E9%85%8D%E7%BD%AEGHCR%E7%9B%B8%E5%85%B3%E4%BF%A1%E6%81%AF/" rel="next" title="Ubuntu/Debian 系统登录 GitHub GHCR">
+                  Ubuntu/Debian 系统登录 GitHub GHCR <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">hanson</span>
+  </div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

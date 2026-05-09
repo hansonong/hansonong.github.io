@@ -1,0 +1,1080 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>OpenWrt 安装与配置 Passwall2 教程</title>
+    <url>/2023/10/27/Openwrt%E5%AE%89%E8%A3%85Passwall/</url>
+    <content><![CDATA[<blockquote>
+<p>本文提供一份在 OpenWrt 系统上安装和配置 Passwall2 插件的详细指南。Passwall2 是一款功能强大的网络代理客户端，可以帮助您轻松管理和转发网络流量。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><h3 id="什么是-Passwall2"><a href="#什么是-Passwall2" class="headerlink" title="什么是 Passwall2?"></a>什么是 Passwall2?</h3><p>Passwall2 是 OpenWrt 平台上一个广受欢迎的 LuCI 插件，它集成了多种代理协议（如 Trojan, VLESS, VMess, Shadowsocks 等），并提供了一个用户友好的图形界面来管理网络流量。通过它，您可以实现对路由器下所有设备进行透明代理，而无需在每个设备上单独配置。</p>
+<h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><p>在开始之前，请确保您已准备好以下几项：</p>
+<ol>
+<li><strong>一台已刷入 OpenWrt 的路由器</strong>：并确保其已连接到互联网。</li>
+<li><strong>SSH 访问权限</strong>：您需要能够通过 SSH 登录到您的 OpenWrt 路由器。</li>
+<li><strong>一个可用的代理服务节点</strong>：您需要擁有代理服務器的訂閱連結或詳細配置資訊。</li>
+</ol>
+<h2 id="安装-Passwall2"><a href="#安装-Passwall2" class="headerlink" title="安装 Passwall2"></a>安装 Passwall2</h2><p>安装 Passwall2 主要有两种方法：手动上传 <code>.ipk</code> 文件进行安装（最可靠）或通过添加软件源自动安装。</p>
+<h3 id="方法一：手动上传-IPK-文件安装-最推荐"><a href="#方法一：手动上传-IPK-文件安装-最推荐" class="headerlink" title="方法一：手动上传 IPK 文件安装 (最推荐)"></a>方法一：手动上传 IPK 文件安装 (最推荐)</h3><p>此方法最为可靠，可以避免因软件源失效或版本不兼容导致的问题，也是解决安装错误的最终手段。</p>
+<h4 id="第-1-步：确定路由器-CPU-架构"><a href="#第-1-步：确定路由器-CPU-架构" class="headerlink" title="第 1 步：确定路由器 CPU 架构"></a>第 1 步：确定路由器 CPU 架构</h4><p>这是最关键的一步，装错架构的软件包将无法运行。</p>
+<ol>
+<li>登录 OpenWrt 管理界面 (LuCI)。</li>
+<li>在 <strong>「状态」-&gt;「总览」</strong> 页面，找到 <strong>「系统」</strong> 信息卡。</li>
+<li>记下 <strong>「架构」</strong> (Architecture) 这一行的信息。常见的有 <code>x86_64</code>, <code>aarch64_cortex-a53</code>, <code>aarch64_cortex-a72</code> 等。</li>
+</ol>
+<h4 id="第-2-步：下载-Passwall2-相关文件"><a href="#第-2-步：下载-Passwall2-相关文件" class="headerlink" title="第 2 步：下载 Passwall2 相关文件"></a>第 2 步：下载 Passwall2 相关文件</h4><p>你需要从 Passwall2 的开发者 GitHub 发布页下载所有必需的文件。</p>
+<ol>
+<li><strong>访问项目发布页</strong>：<a href="https://github.com/xiaorouji/openwrt-passwall2/releases">xiaorouji&#x2F;openwrt-passwall2 Releases</a></li>
+<li><strong>下载核心文件</strong>：在最新版本中，找到并下载以下 <strong>3 个关键文件</strong>：<ul>
+<li><strong>LuCI 界面程序</strong>: <code>luci-app-passwall2_*.ipk</code></li>
+<li><strong>中文语言包</strong>: <code>luci-i18n-passwall2-zh-cn_*.ipk</code></li>
+<li><strong>核心依赖包</strong>: 根据你的 CPU 架构，下载对应的 <code>passwall_packages_ipk_*.zip</code> 文件。例如，<code>x86_64</code> 架构就下载 <code>passwall_packages_ipk_x86_64.zip</code>。<strong>如果找不到完全匹配的，请选择 <code>generic</code> (通用) 版本</strong>，例如 <code>passwall_packages_ipk_aarch64_generic.zip</code>。</li>
+</ul>
+</li>
+<li><strong>解压依赖包</strong>：将下载的 <code>passwall_packages_ipk_*.zip</code> 文件解压缩，你会得到一个包含大量 <code>.ipk</code> 文件的文件夹。</li>
+</ol>
+<h4 id="第-3-步：上传并安装"><a href="#第-3-步：上传并安装" class="headerlink" title="第 3 步：上传并安装"></a>第 3 步：上传并安装</h4><ol>
+<li>登录 OpenWrt 管理界面，进入 <strong>「系统」-&gt;「文件传输」</strong>。</li>
+<li>将上一步下载和解压出的<strong>所有 <code>.ipk</code> 文件</strong>（包括界面、语言包和所有依赖文件）上传到路由器的 <code>/tmp</code> 目录下。</li>
+<li>通过 SSH 登录到 OpenWrt，执行以下命令进行安装：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">opkg install /tmp/*.ipk</span><br></pre></td></tr></table></figure></li>
+<li>安装完成后，刷新 LuCI 页面，即可在 <strong>「服务」</strong> 菜单下找到 Passwall2。</li>
+</ol>
+<hr>
+<h3 id="方法二：添加软件源安装-备选方案"><a href="#方法二：添加软件源安装-备选方案" class="headerlink" title="方法二：添加软件源安装 (备选方案)"></a>方法二：添加软件源安装 (备选方案)</h3><p>此方法较为便捷，但可能因源的维护问题而失效。</p>
+<ol>
+<li><p><strong>SSH 登录到 OpenWrt</strong><br>打开终端（在 Windows 上可以是 PowerShell 或 PuTTY），输入以下命令登录到您的路由器。默认 IP 通常是 <code>192.168.1.1</code>，请根据您的实际情况修改。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ssh root@192.168.1.1</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>编辑 OPKG 配置文件</strong><br>执行以下命令，编辑自定义软件源配置文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vi /etc/opkg/customfeeds.conf</span><br></pre></td></tr></table></figure>
+<p>按 <code>i</code> 键进入编辑模式，添加以下软件源（注意：此源可能失效，请自行寻找可用源）：</p>
+<figure class="highlight crystal"><table><tr><td class="code"><pre><span class="line">src/gz passwall_packages [<span class="symbol">https:</span>/<span class="regexp">/github.com/xiaorouji</span><span class="regexp">/openwrt-passwall-packages/releases</span><span class="regexp">/download/</span><span class="number">1.23</span>-<span class="number">5</span>](<span class="symbol">https:</span>/<span class="regexp">/github.com/xiaorouji</span><span class="regexp">/openwrt-passwall-packages/releases</span><span class="regexp">/download/</span><span class="number">1.23</span>-<span class="number">5</span>)</span><br><span class="line">src/gz passwall_luci [<span class="symbol">https:</span>/<span class="regexp">/github.com/xiaorouji</span><span class="regexp">/openwrt-passwall/releases</span><span class="regexp">/download/v</span>4.<span class="number">73</span>-<span class="number">1</span>](<span class="symbol">https:</span>/<span class="regexp">/github.com/xiaorouji</span><span class="regexp">/openwrt-passwall/releases</span><span class="regexp">/download/v</span>4.<span class="number">73</span>-<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p>添加后，按 <code>Esc</code> 键，然后输入 <code>:wq</code> 保存并退出。</p>
+</li>
+<li><p><strong>更新软件列表并安装</strong><br>执行以下命令来更新软件列表并安装 Passwall2 及其依赖。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">opkg update</span><br><span class="line">opkg install luci-app-passwall2</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="配置-Passwall2"><a href="#配置-Passwall2" class="headerlink" title="配置 Passwall2"></a>配置 Passwall2</h2><p>安装成功后，在 LuCI 界面的 <strong>「服务」-&gt;「Passwall2」</strong> 中进行配置。</p>
+<ol>
+<li><p><strong>添加节点订阅</strong></p>
+<ul>
+<li>点击 <strong>「节点订阅」</strong> 标签页。</li>
+<li>勾选 <strong>「启用」</strong>。</li>
+<li>在 <strong>「订阅列表」</strong> 中，点击「添加」，填入你的订阅链接，设置备注，然后点击「保存」。</li>
+<li>回到页面顶部，点击 <strong>「保存并应用」</strong>。</li>
+<li>稍等片刻，然后点击 <strong>「手动订阅」</strong> 按钮，系统会自动拉取节点信息。成功后，节点会出现在下方的「节点列表」中。</li>
+</ul>
+</li>
+<li><p><strong>基础设置</strong></p>
+<ul>
+<li>切换到 <strong>「基本设置」</strong> 标签页。</li>
+<li><strong>主开关</strong>: 勾选 <strong>「启用」</strong> 来开启 Passwall2 服务。</li>
+<li><strong>TCP 节点 &#x2F; UDP 节点</strong>: 从下拉菜单中选择一个你想要使用的节点。UDP 节点通常用于游戏或视频通话，如果不需要可以设为「禁用」。</li>
+<li><strong>代理模式</strong>:<ul>
+<li><strong>GFWList 模式</strong>: 推荐模式，仅被 GFW 屏蔽的网站流量会通过代理。</li>
+<li><strong>全局代理</strong>: 所有流量都通过代理，可能会影响国内网站的访问速度。</li>
+</ul>
+</li>
+<li><strong>DNS</strong>: 建议设置为防污染的 DNS，例如 <code>8.8.8.8</code> 或使用加密的 <code>DOH</code> (DNS over HTTPS)。</li>
+</ul>
+</li>
+<li><p><strong>保存配置</strong><br>完成所有设置后，点击页面底部的 <strong>「保存并应用」</strong> 按钮。等待片刻，Passwall2 就会开始工作。</p>
+</li>
+</ol>
+<h2 id="常见问题-Troubleshooting"><a href="#常见问题-Troubleshooting" class="headerlink" title="常见问题 (Troubleshooting)"></a>常见问题 (Troubleshooting)</h2><ol>
+<li><p><strong>安装时提示 <code>opkg_install_cmd: Cannot install package...</code> 或错误码 255？</strong></p>
+<ul>
+<li><strong>原因</strong>: 绝大多数情况是 <strong>依赖缺失</strong> 或 <strong>架构不匹配</strong>。</li>
+<li><strong>解决方案</strong>: 请严格按照 <strong>「方法一：手动上传 IPK 文件安装」</strong> 的步骤操作。确保将 <code>passwall_packages_ipk_*.zip</code> 解压后的 <strong>所有</strong> 依赖文件都上传到 <code>/tmp</code> 目录再执行安装命令。</li>
+</ul>
+</li>
+<li><p><strong>Passwall2 已启用，但无法访问外网？</strong></p>
+<ul>
+<li><strong>检查节点</strong>: 在「节点列表」中，点击节点右侧的「在线测试」(小地球图标)，看是否能正常连接。</li>
+<li><strong>检查路由器时间</strong>: SSH 登录后输入 <code>date</code> 命令，检查系统时间是否准确。不正确的时间会导致证书验证失败。</li>
+<li><strong>检查 DNS</strong>: 确保 DNS 设置正确，避免 DNS 污染。</li>
+</ul>
+</li>
+<li><p><strong>某些国内网站打不开或速度很慢？</strong></p>
+<ul>
+<li><strong>原因</strong>: 可能该网站的服务器在海外，被代理规则错误地匹配了。</li>
+<li><strong>解决方案</strong>: 在 <strong>「访问控制」</strong> 标签页中，将该网站的域名添加到 <strong>「强制走 WAN 口的域名」</strong> 列表中，使其直连。</li>
+</ul>
+</li>
+</ol>
+<p>希望这份详细的指南能帮助您顺利完成 Passwall2 的安装与配置！</p>
+]]></content>
+      <categories>
+        <category>运维部署</category>
+        <category>网络配置</category>
+      </categories>
+      <tags>
+        <tag>OpenWrt</tag>
+        <tag>Passwall</tag>
+        <tag>LuCI</tag>
+        <tag>代理</tag>
+        <tag>GFW</tag>
+        <tag>软路由</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Ubuntu 安装 Node.js 环境</title>
+    <url>/2024/06/10/Ubuntu%E5%AE%89%E8%A3%85Node.js%20%E7%8E%AF%E5%A2%83/</url>
+    <content><![CDATA[<blockquote>
+<p>本文介绍如何在 Ubuntu 上安装 Node.js 环境，包括 Node.js、npm 和 pnpm 的安装步骤。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="1-更新系统"><a href="#1-更新系统" class="headerlink" title="1. 更新系统"></a>1. 更新系统</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt update</span><br></pre></td></tr></table></figure>
+
+<p>安装 NodeSource 源（以 Node.js 22.x 为例）</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -fsSL https://deb.nodesource.com/setup_22.x | <span class="built_in">sudo</span> -E bash -</span><br><span class="line"><span class="built_in">sudo</span> apt install -y nodejs</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-验证安装"><a href="#2-验证安装" class="headerlink" title="2. 验证安装"></a>2. 验证安装</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">node -v</span><br><span class="line">npm -v</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-安装-pnpm"><a href="#3-安装-pnpm" class="headerlink" title="3. 安装 pnpm"></a>3. 安装 pnpm</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install -g pnpm</span><br></pre></td></tr></table></figure>
+<h2 id="4-验证-pnpm-安装"><a href="#4-验证-pnpm-安装" class="headerlink" title="4. 验证 pnpm 安装"></a>4. 验证 pnpm 安装</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pnpm -v</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-使用-nvm-管理Node-js-版本"><a href="#5-使用-nvm-管理Node-js-版本" class="headerlink" title="5. 使用 nvm 管理Node.js 版本"></a>5. 使用 nvm 管理Node.js 版本</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash</span><br><span class="line"><span class="built_in">source</span> ~/.bashrc</span><br><span class="line">nvm --version</span><br></pre></td></tr></table></figure>
+
+<p>安装 Node.js 指定版本</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nvm install 22</span><br><span class="line">nvm use 22</span><br><span class="line">nvm <span class="built_in">alias</span> default 22</span><br></pre></td></tr></table></figure>
+
+<p>验证 Node.js 最新版本</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nvm install --lts</span><br><span class="line">nvm use --lts</span><br><span class="line">nvm <span class="built_in">alias</span> default lts/*</span><br><span class="line">node -v</span><br></pre></td></tr></table></figure>
+
+<p>nvm chakra 列出已安装的 Node.js 版本</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nvm <span class="built_in">ls</span></span><br></pre></td></tr></table></figure>
+
+<p>nvm 卸载Node.js 版本</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nvm uninstall 22</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-npm-升级到最新版本"><a href="#6-npm-升级到最新版本" class="headerlink" title="6. npm 升级到最新版本"></a>6. npm 升级到最新版本</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install -g npm@latest</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-使用-npm-安装-pnpm"><a href="#7-使用-npm-安装-pnpm" class="headerlink" title="7. 使用 npm 安装 pnpm"></a>7. 使用 npm 安装 pnpm</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install -g pnpm</span><br></pre></td></tr></table></figure>
+
+<p>升级到最新版本</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install -g pnpm@latest</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-参考文献"><a href="#8-参考文献" class="headerlink" title="8. 参考文献"></a>8. 参考文献</h2><ul>
+<li><a href="https://nodejs.org/en/docs/">Node.js 官方文档</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>前端</category>
+      </categories>
+      <tags>
+        <tag>Ubuntu</tag>
+        <tag>Node.js</tag>
+        <tag>npm</tag>
+        <tag>pnpm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Win11 LTSC 系统安装配置</title>
+    <url>/2026/04/02/Win11%20Ltsc%20%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<h2 id="一、系统激活（KMS）"><a href="#一、系统激活（KMS）" class="headerlink" title="一、系统激活（KMS）"></a>一、系统激活（KMS）</h2><ol>
+<li>右击开始图标，选择 <strong>以管理员身份运行 PowerShell</strong>。</li>
+<li>依次输入以下命令并回车执行：</li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">slmgr <span class="literal">-ipk</span> M7XTQ<span class="literal">-FN8P6-TTKYV-9D4CC-J462D</span></span><br><span class="line">slmgr <span class="literal">-skms</span> kms.<span class="number">0</span>t.net.cn</span><br><span class="line">slmgr <span class="literal">-ato</span></span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+
+
+<hr>
+<h2 id="二、重置-Microsoft-Store"><a href="#二、重置-Microsoft-Store" class="headerlink" title="二、重置 Microsoft Store"></a>二、重置 Microsoft Store</h2><ol>
+<li>按下 <code>Win + S</code>，搜索 <strong>PowerShell</strong>，点击右侧 <strong>以管理员身份运行</strong>。</li>
+<li>输入以下命令并回车执行：</li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">wsreset <span class="literal">-i</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="三、恢复旧版右键菜单"><a href="#三、恢复旧版右键菜单" class="headerlink" title="三、恢复旧版右键菜单"></a>三、恢复旧版右键菜单</h2><p>Win11 默认右键菜单为简化版，恢复为经典完整菜单：</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">reg add <span class="string">&quot;HKCU\Software\Classes\CLSID\&#123;86ca1aa0-34aa-4e8b-a509-50c905bae2a2&#125;\InprocServer32&quot;</span> /f /ve</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>重启资源管理器或注销重登后生效：<code>taskkill /f /im explorer.exe &amp; start explorer.exe</code></p>
+</blockquote>
+<hr>
+<h2 id="四、关闭系统遥测与广告"><a href="#四、关闭系统遥测与广告" class="headerlink" title="四、关闭系统遥测与广告"></a>四、关闭系统遥测与广告</h2><p>以管理员身份运行 PowerShell，执行：</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 关闭诊断数据收集</span></span><br><span class="line"><span class="built_in">Set-ItemProperty</span> <span class="literal">-Path</span> <span class="string">&quot;HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection&quot;</span> <span class="literal">-Name</span> <span class="string">&quot;AllowTelemetry&quot;</span> <span class="literal">-Value</span> <span class="number">0</span> <span class="literal">-Force</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭个性化广告</span></span><br><span class="line"><span class="built_in">Set-ItemProperty</span> <span class="literal">-Path</span> <span class="string">&quot;HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo&quot;</span> <span class="literal">-Name</span> <span class="string">&quot;Enabled&quot;</span> <span class="literal">-Value</span> <span class="number">0</span> <span class="literal">-Force</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="五、关闭自动更新（可选）"><a href="#五、关闭自动更新（可选）" class="headerlink" title="五、关闭自动更新（可选）"></a>五、关闭自动更新（可选）</h2><p>LTSC 版本更新频率较低，若需彻底关闭自动更新：</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 禁用 Windows Update 服务</span></span><br><span class="line"><span class="built_in">sc</span> config wuauserv <span class="built_in">start</span>= disabled</span><br><span class="line"><span class="built_in">Stop-Service</span> wuauserv</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>⚠️ 建议仅在测试&#x2F;离线环境中使用，生产环境请保留安全更新。</p>
+</blockquote>
+<hr>
+<h2 id="六、开启剪贴板历史"><a href="#六、开启剪贴板历史" class="headerlink" title="六、开启剪贴板历史"></a>六、开启剪贴板历史</h2><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">Set-ItemProperty</span> <span class="literal">-Path</span> <span class="string">&quot;HKCU:\Software\Microsoft\Clipboard&quot;</span> <span class="literal">-Name</span> <span class="string">&quot;EnableClipboardHistory&quot;</span> <span class="literal">-Value</span> <span class="number">1</span> <span class="literal">-Force</span></span><br></pre></td></tr></table></figure>
+
+<p>或直接按 <code>Win + V</code> 按提示开启，之后按 <code>Win + V</code> 可查看剪贴板历史记录。</p>
+<hr>
+<h2 id="七、关闭休眠（节省磁盘空间）"><a href="#七、关闭休眠（节省磁盘空间）" class="headerlink" title="七、关闭休眠（节省磁盘空间）"></a>七、关闭休眠（节省磁盘空间）</h2><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">powercfg <span class="literal">-h</span> off</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="八、开启长路径支持"><a href="#八、开启长路径支持" class="headerlink" title="八、开启长路径支持"></a>八、开启长路径支持</h2><p>解除 Windows 260 字符路径限制，对开发环境友好：</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">Set-ItemProperty</span> <span class="literal">-Path</span> <span class="string">&quot;HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem&quot;</span> <span class="literal">-Name</span> <span class="string">&quot;LongPathsEnabled&quot;</span> <span class="literal">-Value</span> <span class="number">1</span> <span class="literal">-Force</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="九、配置远程桌面（RDP）"><a href="#九、配置远程桌面（RDP）" class="headerlink" title="九、配置远程桌面（RDP）"></a>九、配置远程桌面（RDP）</h2><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 开启远程桌面</span></span><br><span class="line"><span class="built_in">Set-ItemProperty</span> <span class="literal">-Path</span> <span class="string">&quot;HKLM:\System\CurrentControlSet\Control\Terminal Server&quot;</span> <span class="literal">-Name</span> <span class="string">&quot;fDenyTSConnections&quot;</span> <span class="literal">-Value</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 放行防火墙规则</span></span><br><span class="line"><span class="built_in">Enable-NetFirewallRule</span> <span class="literal">-DisplayGroup</span> <span class="string">&quot;Remote Desktop&quot;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十、安装包管理器-winget-Scoop"><a href="#十、安装包管理器-winget-Scoop" class="headerlink" title="十、安装包管理器 winget &#x2F; Scoop"></a>十、安装包管理器 winget &#x2F; Scoop</h2><h3 id="winget（系统内置，确认可用）"><a href="#winget（系统内置，确认可用）" class="headerlink" title="winget（系统内置，确认可用）"></a>winget（系统内置，确认可用）</h3><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">winget <span class="literal">--version</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Scoop（推荐开发者使用）"><a href="#Scoop（推荐开发者使用）" class="headerlink" title="Scoop（推荐开发者使用）"></a>Scoop（推荐开发者使用）</h3><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">Set-ExecutionPolicy</span> RemoteSigned <span class="literal">-Scope</span> CurrentUser</span><br><span class="line"><span class="built_in">irm</span> get.scoop.sh | <span class="built_in">iex</span></span><br></pre></td></tr></table></figure>
+
+<p>安装常用工具示例：</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">scoop install git <span class="built_in">curl</span> <span class="number">7</span>zip vim</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十一、安装-WSL2（适合开发者）"><a href="#十一、安装-WSL2（适合开发者）" class="headerlink" title="十一、安装 WSL2（适合开发者）"></a>十一、安装 WSL2（适合开发者）</h2><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">wsl <span class="literal">--install</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>默认安装 Ubuntu，重启后完成初始化。可通过 <code>wsl --list --online</code> 查看可用发行版。</p>
+</blockquote>
+<hr>
+<h2 id="十二、开启-Hyper-V（虚拟化）"><a href="#十二、开启-Hyper-V（虚拟化）" class="headerlink" title="十二、开启 Hyper-V（虚拟化）"></a>十二、开启 Hyper-V（虚拟化）</h2><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">Enable-WindowsOptionalFeature</span> <span class="literal">-Online</span> <span class="literal">-FeatureName</span> Microsoft<span class="literal">-Hyper-V-All</span> <span class="literal">-NoRestart</span></span><br></pre></td></tr></table></figure>
+
+<p>重启后生效。</p>
+<hr>
+<h2 id="十三、系统性能优化"><a href="#十三、系统性能优化" class="headerlink" title="十三、系统性能优化"></a>十三、系统性能优化</h2><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 调整为&quot;最佳性能&quot;视觉效果</span></span><br><span class="line"><span class="variable">$path</span> = <span class="string">&quot;HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects&quot;</span></span><br><span class="line"><span class="built_in">Set-ItemProperty</span> <span class="literal">-Path</span> <span class="variable">$path</span> <span class="literal">-Name</span> <span class="string">&quot;VisualFXSetting&quot;</span> <span class="literal">-Value</span> <span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置高性能电源计划</span></span><br><span class="line">powercfg <span class="literal">-setactive</span> <span class="number">8</span>c5e7fda<span class="literal">-e8bf-4a96-9a85-a6e23a8c635c</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="十四、其他实用设置"><a href="#十四、其他实用设置" class="headerlink" title="十四、其他实用设置"></a>十四、其他实用设置</h2><table>
+<thead>
+<tr>
+<th>功能</th>
+<th>操作路径</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>开启夜间模式</td>
+<td>设置 → 系统 → 屏幕 → 夜间模式</td>
+</tr>
+<tr>
+<td>设置时区</td>
+<td>设置 → 时间和语言 → 日期和时间</td>
+</tr>
+<tr>
+<td>关闭锁屏广告</td>
+<td>设置 → 个性化 → 锁屏界面 → 关闭”在锁屏界面获取花絮、提示”</td>
+</tr>
+<tr>
+<td>开启存储感知</td>
+<td>设置 → 系统 → 存储 → 存储感知</td>
+</tr>
+<tr>
+<td>任务栏移至左侧</td>
+<td>设置 → 个性化 → 任务栏 → 任务栏行为 → 对齐方式：靠左</td>
+</tr>
+</tbody></table>
+]]></content>
+      <categories>
+        <category>工具教程</category>
+      </categories>
+      <tags>
+        <tag>Windows</tag>
+        <tag>系统配置</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux Docker常见运维命令</title>
+    <url>/2026/04/28/linux-docker%E5%B8%B8%E7%94%A8%E8%BF%90%E7%BB%B4%E5%91%BD%E4%BB%A4/</url>
+    <content><![CDATA[<blockquote>
+<p>本文总结了在 Linux 环境下，日常运维中最常用的 Docker 及 Docker Compose 相关管理与排错命令。</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="1-服务管理"><a href="#1-服务管理" class="headerlink" title="1. 服务管理"></a>1. 服务管理</h3><p>控制 Docker 守护进程的基础操作（以 systemd 为例）：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动 Docker 服务</span></span><br><span class="line">sudo systemctl start docker</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">停止 Docker 服务</span></span><br><span class="line">sudo systemctl stop docker</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重启 Docker 服务</span></span><br><span class="line">sudo systemctl restart docker</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置开机自启</span></span><br><span class="line">sudo systemctl enable docker</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看 Docker 服务状态</span></span><br><span class="line">sudo systemctl status docker</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看 Docker 系统全局信息（包含镜像集、容器数、存储驱动等情况）</span></span><br><span class="line">docker info</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-镜像管理-Image"><a href="#2-镜像管理-Image" class="headerlink" title="2. 镜像管理 (Image)"></a>2. 镜像管理 (Image)</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看本地已下载的镜像列表</span></span><br><span class="line">docker images</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或者</span></span><br><span class="line">docker image ls</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">拉取（下载）镜像，不加tag默认拉取latest版本</span></span><br><span class="line">docker pull &lt;镜像名&gt;:&lt;tag&gt;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">示例：docker pull nginx:1.24</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">删除指定本地镜像</span></span><br><span class="line">docker rmi &lt;镜像ID或镜像名&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">强制删除镜像（即使有容器依赖）</span></span><br><span class="line">docker rmi -f &lt;镜像ID或镜像名&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">清除所有虚悬镜像（&lt;none&gt;:&lt;none&gt; 未被使用的且没有名字的镜像）</span></span><br><span class="line">docker image prune</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-容器管理-Container"><a href="#3-容器管理-Container" class="headerlink" title="3. 容器管理 (Container)"></a>3. 容器管理 (Container)</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看当前正在运行的容器</span></span><br><span class="line">docker ps</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看所有容器（包括已停止的）</span></span><br><span class="line">docker ps -a</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动、停止、重启容器</span></span><br><span class="line">docker start &lt;容器ID或名称&gt;</span><br><span class="line">docker stop &lt;容器ID或名称&gt;</span><br><span class="line">docker restart &lt;容器ID或名称&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">强制停止（杀死）运行中的容器</span></span><br><span class="line">docker kill &lt;容器ID或名称&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">删除已停止的指定容器</span></span><br><span class="line">docker rm &lt;容器ID或名称&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">强制删除正在运行的容器</span></span><br><span class="line">docker rm -f &lt;容器ID或名称&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">运行一个容器（以交互模式、后台运行并进行端口映射为例）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-d 后台运行</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-p 宿主机端口:容器内端口</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--name 设定容器名</span></span><br><span class="line">docker run -d -p 8080:80 --name mynginx nginx</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-日志与排错-Logs-Inspection"><a href="#4-日志与排错-Logs-Inspection" class="headerlink" title="4. 日志与排错 (Logs &amp; Inspection)"></a>4. 日志与排错 (Logs &amp; Inspection)</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看容器运行日志</span></span><br><span class="line">docker logs &lt;容器ID或名称&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">实时查看（跟踪）容器日志的最后 100 行</span></span><br><span class="line">docker logs -f --tail 100 &lt;容器ID或名称&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看容器内的进程信息</span></span><br><span class="line">docker top &lt;容器ID或名称&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">实时显示容器的资源占用情况（CPU、内存、网络I/O等）</span></span><br><span class="line">docker stats &lt;容器ID或名称&gt;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">不带参数默认显示所有正在运行的容器资源占用：docker stats</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看容器的详细配置和元数据（返回 JSON 格式数据）</span></span><br><span class="line">docker inspect &lt;容器ID或名称&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">进入正在运行的容器内部执行命令（通常用于排查环境）</span></span><br><span class="line">docker exec -it &lt;容器ID或名称&gt; /bin/bash</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">某些精简镜像如果没有 bash，可以使用 sh：docker <span class="built_in">exec</span> -it &lt;容器ID或名称&gt; /bin/sh</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-网络与数据卷管理-Network-Volumes"><a href="#5-网络与数据卷管理-Network-Volumes" class="headerlink" title="5. 网络与数据卷管理 (Network &amp; Volumes)"></a>5. 网络与数据卷管理 (Network &amp; Volumes)</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看系统所有 Docker 网络</span></span><br><span class="line">docker network ls</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看某个网络的详细情况</span></span><br><span class="line">docker network inspect &lt;网络名称&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看系统所有数据卷</span></span><br><span class="line">docker volume ls</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">删除未使用的数据卷</span></span><br><span class="line">docker volume prune</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-系统清理-System-Prune"><a href="#6-系统清理-System-Prune" class="headerlink" title="6. 系统清理 (System Prune)"></a>6. 系统清理 (System Prune)</h3><p>清理命令可以帮助释放服务器存储空间，非常实用。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">清理所有停止的容器、未被任何容器使用的网络、未被打标签（dangling）的镜像</span></span><br><span class="line">docker system prune</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">深度清理（包含系统上未被使用的所有的镜像、容器、网络等），并强制执行不提示</span></span><br><span class="line">docker system prune -a -f</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">清理所有闲置数据卷（慎用，可能删掉你需要保留但暂时没挂载的持久化数据）</span></span><br><span class="line">docker volume prune</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-Docker-Compose-常用命令"><a href="#7-Docker-Compose-常用命令" class="headerlink" title="7. Docker Compose 常用命令"></a>7. Docker Compose 常用命令</h3><p>如果你使用 <code>docker-compose.yml</code> 编排多容器服务，在配置文件的同级目录下运行：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">构建并后台启动所有服务</span></span><br><span class="line">docker-compose up -d</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">停止并移除容器、网络以及配置文件中声明的默认卷</span></span><br><span class="line">docker-compose down</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">仅停止运行中的容器，不移除它们</span></span><br><span class="line">docker-compose stop</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">对应启动</span></span><br><span class="line">docker-compose start</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重启项目中的所有服务</span></span><br><span class="line">docker-compose restart</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看服务运行日志</span></span><br><span class="line">docker-compose logs -f</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>容器与虚拟化</category>
+        <category>运维部署</category>
+      </categories>
+      <tags>
+        <tag>Docker</tag>
+        <tag>Linux</tag>
+        <tag>运维</tag>
+        <tag>常用命令</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>linux-docker部署项目</title>
+    <url>/2025/02/07/linux-docker%E9%83%A8%E7%BD%B2%E9%A1%B9%E7%9B%AE/</url>
+    <content><![CDATA[<blockquote>
+<p>Linux Docker部署项目，包括Docker安装、Mysql、Redis、RabbitMQ、Java、Maven、Nginx、minio等环境准备。</p>
+</blockquote>
+<span id="more"></span>
+
+
+<h3 id="安装-Docker"><a href="#安装-Docker" class="headerlink" title="安装 Docker"></a>安装 Docker</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install apt-transport-https ca-certificates curl software-properties-common</span><br><span class="line">curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg</span><br><span class="line">echo &quot;deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable&quot; | sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null</span><br><span class="line">sudo apt update</span><br><span class="line">sudo apt install docker-ce docker-ce-cli containerd.io</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装docker-compose"><a href="#安装docker-compose" class="headerlink" title="安装docker-compose"></a>安装docker-compose</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo curl -L &quot;https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)&quot; -o /usr/local/bin/docker-compose</span><br><span class="line">sudo chmod +x /usr/local/bin/docker-compose</span><br><span class="line">docker-compose --version</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装-Docker-Mysql"><a href="#安装-Docker-Mysql" class="headerlink" title="安装 Docker Mysql"></a>安装 Docker Mysql</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker run -d --name mysql --restart=always -p 3306:3306 -e MYSQL_ROOT_PASSWORD=poiu0987  mysql:latest</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装-Docker-Redis"><a href="#安装-Docker-Redis" class="headerlink" title="安装 Docker Redis"></a>安装 Docker Redis</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker run -d  --name redis --restart=always -p 6379:6379 redis --requirepass &quot;poiu0987&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装-Docker-RabbitMQ"><a href="#安装-Docker-RabbitMQ" class="headerlink" title="安装 Docker RabbitMQ"></a>安装 Docker RabbitMQ</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker run -d --name rabbitmq --restart=always -p 15672:15672 -p 5672:5672 rabbitmq:latest</span><br></pre></td></tr></table></figure>
+<p>安装好rabbitmq后，启用延时插件</p>
+<ul>
+<li>下载插件</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">curl -LO https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v4.1.0/rabbitmq_delayed_message_exchange-4.1.0.ez</span><br></pre></td></tr></table></figure>
+<ul>
+<li>拷贝插件到RabbitMQ的插件目录</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker cp rabbitmq_delayed_message_exchange-4.1.0.ez rabbitmq:/opt/rabbitmq/plugins/</span><br></pre></td></tr></table></figure>
+<ul>
+<li>查看插件列表</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">rabbitmq-plugins list</span><br></pre></td></tr></table></figure>
+<ul>
+<li>启用插件</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">rabbitmq-plugins enable rabbitmq_delayed_message_exchange</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装-Java"><a href="#安装-Java" class="headerlink" title="安装 Java"></a>安装 Java</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo add-apt-repository ppa:openjdk-r/ppa</span><br><span class="line">sudo apt update</span><br><span class="line">sudo apt-get install openjdk-21-jre</span><br><span class="line">sudo apt-get install openjdk-21-jdk</span><br><span class="line">java --version</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装-Maven"><a href="#安装-Maven" class="headerlink" title="安装 Maven"></a>安装 Maven</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">wget https://dlcdn.apache.org/maven/maven-3/3.9.10/binaries/apache-maven-3.9.10-bin.tar.gz</span><br><span class="line">tar -zxvf apache-maven-3.9.10-bin.tar.gz</span><br><span class="line">mv apache-maven-3.9.10 /opt/</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装-Nginx"><a href="#安装-Nginx" class="headerlink" title="安装 Nginx"></a>安装 Nginx</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install nginx</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>运维部署</category>
+        <category>容器与虚拟化</category>
+      </categories>
+      <tags>
+        <tag>Docker</tag>
+        <tag>Linux</tag>
+        <tag>MySQL</tag>
+        <tag>Redis</tag>
+        <tag>RabbitMQ</tag>
+        <tag>Java</tag>
+        <tag>Maven</tag>
+        <tag>Nginx</tag>
+        <tag>MinIO</tag>
+        <tag>环境搭建</tag>
+        <tag>部署教程</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ubuntu(debian) Apache2多端口部署</title>
+    <url>/2026/04/28/linux%E5%AE%89%E8%A3%85apache2/</url>
+    <content><![CDATA[<blockquote>
+<p>Linux Apache2多端口，多项目部署。</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="Linux-Apache2多端口部署"><a href="#Linux-Apache2多端口部署" class="headerlink" title="Linux Apache2多端口部署"></a>Linux Apache2多端口部署</h3><h4 id="安装Apache2"><a href="#安装Apache2" class="headerlink" title="安装Apache2"></a>安装Apache2</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install apache2</span><br></pre></td></tr></table></figure>
+
+<h4 id="找到ports-conf文件"><a href="#找到ports-conf文件" class="headerlink" title="找到ports.conf文件"></a>找到ports.conf文件</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cd /etc/apache2</span><br><span class="line">ls</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">root@nine:~# cd /etc/apache2/</span><br><span class="line">root@nine:/etc/apache2# ls</span><br><span class="line">apache2.conf    conf-enabled  magic           mods-enabled  sites-available</span><br><span class="line">conf-available  envvars       mods-available  ports.conf    sites-enabled</span><br></pre></td></tr></table></figure>
+
+<h4 id="编辑ports-conf文件"><a href="#编辑ports-conf文件" class="headerlink" title="编辑ports.conf文件"></a>编辑ports.conf文件</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">vim ports.conf</span><br></pre></td></tr></table></figure>
+
+<h4 id="添加端口，如下"><a href="#添加端口，如下" class="headerlink" title="添加端口，如下"></a>添加端口，如下</h4><figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="comment"># If you just change the port or add more ports here, you will likely also</span></span><br><span class="line"><span class="comment"># have to change the VirtualHost statement in</span></span><br><span class="line"><span class="comment"># /etc/apache2/sites-enabled/000-default.conf</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># sports-memory</span></span><br><span class="line"><span class="attribute">Listen</span> <span class="number">23106</span></span><br><span class="line"><span class="comment"># blog</span></span><br><span class="line"><span class="attribute">Listen</span> <span class="number">23107</span></span><br><span class="line"><span class="comment"># wprdpress</span></span><br><span class="line"><span class="attribute">Listen</span> <span class="number">23108</span></span><br><span class="line"></span><br><span class="line"><span class="section">&lt;IfModule ssl_module&gt;</span></span><br><span class="line">        <span class="attribute">Listen</span> <span class="number">443</span></span><br><span class="line"><span class="section">&lt;/IfModule&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="section">&lt;IfModule mod_gnutls.c&gt;</span></span><br><span class="line">        <span class="attribute">Listen</span> <span class="number">443</span></span><br><span class="line"><span class="section">&lt;/IfModule&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># vim: syntax=apache ts=4 sw=4 sts=4 sr noet</span></span><br><span class="line">~                                                                                                           ~     </span><br></pre></td></tr></table></figure>
+
+<p>添加后，保存退出（<code>:wq</code>）</p>
+<h4 id="添加站点（sites-available）"><a href="#添加站点（sites-available）" class="headerlink" title="添加站点（sites.available）"></a>添加站点（sites.available）</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cd sites-available/</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">root@nine:/etc/apache2# cd sites-available/</span><br><span class="line">root@nine:/etc/apache2/sites-available# ls</span><br><span class="line">000-default.conf  default-ssl.conf</span><br></pre></td></tr></table></figure>
+
+<p>编辑站点</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">vim 000-default.conf</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="section">&lt;VirtualHost *<span class="number">:23106</span>&gt;</span></span><br><span class="line">        <span class="attribute">ServerAdmin</span> webmaster@localhost</span><br><span class="line">        <span class="attribute">DocumentRoot</span> /var/www/html</span><br><span class="line">        <span class="attribute">ErrorLog</span> <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/error.log</span><br><span class="line">        <span class="attribute">CustomLog</span> <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/access.log combined</span><br><span class="line"><span class="section">&lt;/VirtualHost&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="section">&lt;VirtualHost *<span class="number">:23107</span>&gt;</span></span><br><span class="line">        <span class="attribute">ServerAdmin</span> webmaster2@localhost</span><br><span class="line">        <span class="attribute">DocumentRoot</span> /var/www/blog/dist</span><br><span class="line">        <span class="attribute">ErrorLog</span> <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/error.log</span><br><span class="line">        <span class="attribute">CustomLog</span> <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/access.log combined</span><br><span class="line"><span class="section">&lt;/VirtualHost&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="section">&lt;VirtualHost *<span class="number">:23108</span>&gt;</span></span><br><span class="line">        <span class="attribute">ServerAdmin</span> webmaster3@localhost</span><br><span class="line">        <span class="attribute">DocumentRoot</span> /var/www/wordpress</span><br><span class="line">        <span class="attribute">ErrorLog</span> <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/error.log</span><br><span class="line">        <span class="attribute">CustomLog</span> <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/access.log combined</span><br><span class="line"><span class="section">&lt;/VirtualHost&gt;</span></span><br></pre></td></tr></table></figure>
+<p>编辑完成后，保存退出（<code>:wq</code>）</p>
+<h4 id="重启Apache2服务"><a href="#重启Apache2服务" class="headerlink" title="重启Apache2服务"></a>重启Apache2服务</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">systemctl restart apache2</span><br></pre></td></tr></table></figure>
+
+<h4 id="卸载apache2"><a href="#卸载apache2" class="headerlink" title="卸载apache2"></a>卸载apache2</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">apt remove apache2</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>运维部署</category>
+        <category>服务器管理</category>
+      </categories>
+      <tags>
+        <tag>Ubuntu</tag>
+        <tag>Apache2</tag>
+        <tag>Debian</tag>
+        <tag>多端口</tag>
+        <tag>服务器部署</tag>
+        <tag>配置教程</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Ubuntu安装Docker和docker-compose</title>
+    <url>/2026/04/28/linux%E5%AE%89%E8%A3%85docker%E5%92%8Cdocker-compose/</url>
+    <content><![CDATA[<blockquote>
+<p>在 Ubuntu 上安装 Docker 和 Docker Compose，卸载Docker 和 Docker Compose。</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="安装-Docker"><a href="#安装-Docker" class="headerlink" title="安装 Docker"></a>安装 Docker</h3><ol>
+<li>更新系统软件包列表：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt update</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>安装 Docker 依赖包：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt install apt-transport-https ca-certificates curl software-properties-common</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>添加 Docker 的官方 GPG 密钥：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>添加 Docker 的软件源：</li>
+</ol>
+<ul>
+<li>对于 x86_64&#x2F;amd64 架构的系统：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">echo &quot;deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable&quot; | sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>对于 ARM64 架构的系统（如树莓派）：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">echo &quot;deb [arch=arm64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable&quot; | sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>安装 Docker：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install docker-ce docker-ce-cli containerd.io</span><br></pre></td></tr></table></figure>
+
+<ol start="6">
+<li>验证 Docker 是否成功安装：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo docker run hello-world</span><br></pre></td></tr></table></figure>
+
+<p>这将下载并运行一个简单的 Docker 镜像，并输出 “Hello from Docker!”。</p>
+<h3 id="卸载Docker"><a href="#卸载Docker" class="headerlink" title="卸载Docker"></a>卸载Docker</h3><p>要完全卸载Ubuntu上的Docker，执行以下步骤：</p>
+<ol>
+<li><p>停止所有正在运行的Docker容器。可以使用以下命令停止所有容器：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo docker stop $(sudo docker ps -a -q)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>删除所有Docker容器。运行以下命令删除所有容器：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo docker rm $(sudo docker ps -a -q)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>停止Docker服务。使用以下命令停止Docker服务：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo systemctl stop docker</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>卸载Docker软件包。运行以下命令卸载Docker软件包：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get purge docker-ce docker-ce-cli containerd.io</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>删除Docker相关的配置和数据。使用以下命令删除Docker的配置和数据：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo rm -rf /var/lib/docker</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>删除Docker用户组。运行以下命令删除Docker用户组：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo groupdel docker</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>完成以上步骤后，您的系统将不再具有Docker相关的组件和配置。请注意，这将删除所有Docker容器、镜像和数据，因此请确保您已备份重要的数据。</p>
+<h3 id="安装-Docker-Compose"><a href="#安装-Docker-Compose" class="headerlink" title="安装 Docker Compose"></a>安装 Docker Compose</h3><ol>
+<li>下载 Docker Compose 的可执行文件：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo curl -L &quot;https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)&quot; -o /usr/local/bin/docker-compose</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>添加执行权限：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo chmod +x /usr/local/bin/docker-compose</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>验证 Docker Compose 是否成功安装：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker-compose --version</span><br></pre></td></tr></table></figure>
+
+<p>这将显示 Docker Compose 的版本信息。</p>
+<h3 id="卸载-Docker-Compose"><a href="#卸载-Docker-Compose" class="headerlink" title="卸载 Docker Compose"></a>卸载 Docker Compose</h3><ol>
+<li>直接删除 Docker Compose 的可执行文件：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo rm -rf /usr/local/bin/docker-compose</span><br></pre></td></tr></table></figure>
+
+
+<p>这就卸载了 Docker Compose</p>
+]]></content>
+      <categories>
+        <category>容器与虚拟化</category>
+        <category>运维部署</category>
+      </categories>
+      <tags>
+        <tag>Ubuntu</tag>
+        <tag>Docker</tag>
+        <tag>Docker Compose</tag>
+        <tag>容器化</tag>
+        <tag>安装教程</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux常见运维命令</title>
+    <url>/2026/04/28/linux%E5%B8%B8%E8%A7%81%E8%BF%90%E7%BB%B4%E5%91%BD%E4%BB%A4/</url>
+    <content><![CDATA[<blockquote>
+<p>本文总结了 Linux 环境下，日常运维中最常用的命令，涵盖了系统状态、文件管理、网络排查、进程管理以及服务权限等方面内容。</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="1-系统状态与性能查看"><a href="#1-系统状态与性能查看" class="headerlink" title="1. 系统状态与性能查看"></a>1. 系统状态与性能查看</h3><p>排查服务器性能和运行情况时最常用的指令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看系统整体运行状态（CPU负载、内存、进程信息等）</span></span><br><span class="line">top </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">退出 top 按 <span class="string">&#x27;q&#x27;</span></span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看内存使用情况（-h 表示以较为易读的 M/G 格式显示）</span></span><br><span class="line">free -h</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看磁盘空间挂载及使用情况</span></span><br><span class="line">df -h</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">统计目录或文件占用的磁盘空间大小（-s 汇总，-h 易读格式）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">例如查看当前目录总大小</span></span><br><span class="line">du -sh *</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看系统内核版本、主机名等信息</span></span><br><span class="line">uname -a</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看 Linux 发行版信息</span></span><br><span class="line">cat /etc/os-release</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-文件与目录操作"><a href="#2-文件与目录操作" class="headerlink" title="2. 文件与目录操作"></a>2. 文件与目录操作</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看当前所在路径</span></span><br><span class="line">pwd</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">列表展示目录内容（-l 详细信息，-a 包含隐藏文件，-h 文件大小易读）</span></span><br><span class="line">ls -lah</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建单层或多层目录</span></span><br><span class="line">mkdir -p /path/to/directory</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">复制文件或目录（-r 递归复制目录）</span></span><br><span class="line">cp -r /source/path /destination/path</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">移动文件或重命名</span></span><br><span class="line">mv /old/name /new/name</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">删除文件或目录（-r 递归，-f 强制不提示，注意慎用 <span class="built_in">rm</span> -rf）</span></span><br><span class="line">rm -rf /path/to/remove</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查找文件（按名称）</span></span><br><span class="line">find / -name &quot;filename.txt&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">压缩和解压缩 tar.gz 文件</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">打包并压缩</span></span><br><span class="line">tar -czvf archive.tar.gz /path/to/dir</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">解压文件</span></span><br><span class="line">tar -xzvf archive.tar.gz</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-文件查看与内容检索"><a href="#3-文件查看与内容检索" class="headerlink" title="3. 文件查看与内容检索"></a>3. 文件查看与内容检索</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看所有文件内容（适合小文件）</span></span><br><span class="line">cat filename.txt</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">分页查看文件内容（适合大文件）</span></span><br><span class="line">less filename.txt</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看文件尾部的 100 行（常用于查看最新日志）</span></span><br><span class="line">tail -n 100 filename.txt</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">实时监控文件尾部的新增内容</span></span><br><span class="line">tail -f filename.log</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在文件中检索关键字（-i 忽略大小写，-n 显示行号）</span></span><br><span class="line">grep -in &quot;keyword&quot; filename.txt</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">配合管道符检索进程或动态数据</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">例如在所有进程中搜索 nginx</span></span><br><span class="line">ps -ef | grep nginx</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-进程与服务管理"><a href="#4-进程与服务管理" class="headerlink" title="4. 进程与服务管理"></a>4. 进程与服务管理</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看所有正在运行的系统进程详细信息</span></span><br><span class="line">ps -ef </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或</span></span><br><span class="line">ps aux</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">杀死指定 PID 的进程</span></span><br><span class="line">kill &lt;PID&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">强制杀死进程</span></span><br><span class="line">kill -9 &lt;PID&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">后台运行命令，且退出终端不中断</span></span><br><span class="line">nohup command &amp;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">systemd 服务管理（以 nginx 为例）</span></span><br><span class="line">systemctl start nginx    # 启动</span><br><span class="line">systemctl stop nginx     # 停止</span><br><span class="line">systemctl restart nginx  # 重启</span><br><span class="line">systemctl status nginx   # 查看状态</span><br><span class="line">systemctl enable nginx   # 设置开机自启</span><br><span class="line">systemctl disable nginx  # 取消开机自启</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-网络连接与排查"><a href="#5-网络连接与排查" class="headerlink" title="5. 网络连接与排查"></a>5. 网络连接与排查</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看网络接口配置和 IP 地址</span></span><br><span class="line">ip a</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">旧版系统可能使用 ifconfig</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查网络连通性</span></span><br><span class="line">ping google.com</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查本地端口占用及网络连接状态（常用组合：-tuln 查监听端口）</span></span><br><span class="line">ss -tuln</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或使用 netstat</span></span><br><span class="line">netstat -tulnp</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看指定端口被哪个进程占用（极其常用）</span></span><br><span class="line">lsof -i :8080</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或结合 netstat / ss 进行过滤查看</span></span><br><span class="line">netstat -tunlp | grep 8080</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">测试目标主机的指定端口是否开放</span></span><br><span class="line">telnet &lt;IP&gt; &lt;Port&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">命令行模拟 HTTP 请求（测试 Web 接口）</span></span><br><span class="line">curl -I http://localhost</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-用户与权限管理"><a href="#6-用户与权限管理" class="headerlink" title="6. 用户与权限管理"></a>6. 用户与权限管理</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加新用户</span></span><br><span class="line">sudo useradd username</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改用户密码</span></span><br><span class="line">sudo passwd username</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更改文件或目录的拥有者（Owner:Group）</span></span><br><span class="line">sudo chown -R user:group /path/to/directory</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更改文件或目录权限</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">777 为最高权限（慎用），一般文件 644，目录 755</span></span><br><span class="line">sudo chmod 755 /path/to/file_or_dir</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">切换用户</span></span><br><span class="line">su - username</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-系统日志查看"><a href="#7-系统日志查看" class="headerlink" title="7. 系统日志查看"></a>7. 系统日志查看</h3><p>排查问题首选的参考凭据：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看系统内核及硬件日志</span></span><br><span class="line">dmesg</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">跟踪查看系统消息日志（Debian/Ubuntu）</span></span><br><span class="line">tail -f /var/log/syslog</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">跟踪查看系统消息日志（CentOS/RHEL）</span></span><br><span class="line">tail -f /var/log/messages</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用 journalctl 查看所有 systemd 服务的日志</span></span><br><span class="line">journalctl -xe</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查阅特定服务的日志记录（例：sshd）</span></span><br><span class="line">journalctl -u sshd</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-文件传输与下载"><a href="#8-文件传输与下载" class="headerlink" title="8. 文件传输与下载"></a>8. 文件传输与下载</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">远程复制文件到本地（若要上传则对调本地与远程路径）</span></span><br><span class="line">scp user@remote_IP:/remote/path/file.txt /local/path/</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">递归传输整个目录</span></span><br><span class="line">scp -r /local/path/dir user@remote_IP:/remote/path/</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">增量同步文件/目录（非常适合备份；-a 归档，-v 详细，-z 压缩传输）</span></span><br><span class="line">rsync -avz /local/path/ user@remote_IP:/remote/path/</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在终端下载网络资源</span></span><br><span class="line">wget https://example.com/file.zip</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">支持断点续传的下载</span></span><br><span class="line">wget -c https://example.com/file.zip</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-计划任务-Crontab"><a href="#9-计划任务-Crontab" class="headerlink" title="9. 计划任务 (Crontab)"></a>9. 计划任务 (Crontab)</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编辑当前用户的定时任务</span></span><br><span class="line">crontab -e</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">列出当前用户的定时任务</span></span><br><span class="line">crontab -l</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">【补充】crontab 书写规范示例（分 时 日 月 周 命令）：</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">每天凌晨 2 点执行脚本</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">0 2 * * * /bin/bash /path/to/script.sh &gt;&gt; /path/to/log.log 2&gt;&amp;1</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="10-防火墙基础管理"><a href="#10-防火墙基础管理" class="headerlink" title="10. 防火墙基础管理"></a>10. 防火墙基础管理</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--- Ubuntu/Debian 系 (UFW) ---</span></span><br><span class="line">sudo ufw status                # 查看防火墙状态及规则</span><br><span class="line">sudo ufw enable                # 启用防火墙</span><br><span class="line">sudo ufw allow 80/tcp          # 放行 80 端口 (TCP 协议)</span><br><span class="line">sudo ufw delete allow 80/tcp   # 删除放行规则</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--- CentOS/RHEL 系 (firewalld) ---</span></span><br><span class="line">sudo firewall-cmd --state      # 查看运行状态</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">永久放行 8080 端口</span></span><br><span class="line">sudo firewall-cmd --zone=public --add-port=8080/tcp --permanent </span><br><span class="line">sudo firewall-cmd --reload     # 重载防火墙使配置生效</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>运维部署</category>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>Linux</tag>
+        <tag>运维</tag>
+        <tag>常用命令</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux服务器基础设置</title>
+    <url>/2026/04/28/linux%E9%83%A8%E7%BD%B2%E7%9B%B8%E5%85%B3/</url>
+    <content><![CDATA[<blockquote>
+<p>设置端口允许IP访问，免密登录，端口占用查询。</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="设置端口允许IP访问"><a href="#设置端口允许IP访问" class="headerlink" title="设置端口允许IP访问"></a>设置端口允许IP访问</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">允许IP 104.168.76.12 访问 9529 端口</span></span><br><span class="line">firewall-cmd --permanent --add-rich-rule=&quot;rule family=&quot;ipv4&quot; source address=&quot;104.168.76.12&quot; port protocol=&quot;tcp&quot; port=&quot;9529&quot; accept&quot;</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">重新载入一下防火墙设置，使设置生效</span></span><br><span class="line">firewall-cmd --reload</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">查看已设置规则</span></span><br><span class="line">firewall-cmd --zone=public --list-rich-rules</span><br></pre></td></tr></table></figure>
+
+<h3 id="免密登录"><a href="#免密登录" class="headerlink" title="免密登录"></a>免密登录</h3><h5 id="生成密钥"><a href="#生成密钥" class="headerlink" title="生成密钥"></a>生成密钥</h5><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">ssh-keygen -t rsa -C &quot;topnoah@gmail.com&quot;</span><br></pre></td></tr></table></figure>
+
+<h5 id="复制到Linux服务器"><a href="#复制到Linux服务器" class="headerlink" title="复制到Linux服务器"></a>复制到Linux服务器</h5><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">type id_rsa.pub | ssh root@远程服务器 &quot;cat &gt;&gt; .ssh/authorized_keys&quot;</span><br></pre></td></tr></table></figure>
+
+<!-- more -->
+
+<h5 id="复制公钥到指定服务器"><a href="#复制公钥到指定服务器" class="headerlink" title="复制公钥到指定服务器"></a>复制公钥到指定服务器</h5><p>可以直接将本地公钥复制到指定服务器</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">ssh-copy-id root@vps-ubuntu</span><br></pre></td></tr></table></figure>
+
+<h5 id="端口占用查询"><a href="#端口占用查询" class="headerlink" title="端口占用查询"></a>端口占用查询</h5><p>查看所有的服务端口（LISTEN，ESTABLISHED）</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">netstat -ap</span><br></pre></td></tr></table></figure>
+
+<p>查看指定端口，可以结合grep命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">netstat -ap | grep 8080</span><br></pre></td></tr></table></figure>
+
+<p>也可以使用lsof命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">lsof -i:8888</span><br></pre></td></tr></table></figure>
+
+<p>若要关闭使用这个端口的程序，使用kill + 对应的pid</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">kill -9 PID</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>运维部署</category>
+        <category>服务器管理</category>
+      </categories>
+      <tags>
+        <tag>Ubuntu</tag>
+        <tag>Linux</tag>
+        <tag>Debian</tag>
+        <tag>SSH</tag>
+        <tag>防火墙</tag>
+        <tag>端口管理</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ubuntu安装SOCKS5和HTTP代理</title>
+    <url>/2026/04/28/ubuntu%E5%AE%89%E8%A3%85Socks5%E5%92%8Chttp%E4%BB%A3%E7%90%86/</url>
+    <content><![CDATA[<blockquote>
+<p>ubuntu下，使用 Dante 搭建 SOCKS5 代理和 Squid 搭建 HTTP 代理。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="使用-Dante-搭建-SOCKS5-代理"><a href="#使用-Dante-搭建-SOCKS5-代理" class="headerlink" title="使用 Dante 搭建 SOCKS5 代理"></a>使用 Dante 搭建 SOCKS5 代理</h2><h4 id="安装-Dante"><a href="#安装-Dante" class="headerlink" title="安装 Dante"></a>安装 Dante</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"><span class="built_in">sudo</span> apt install dante-server</span><br></pre></td></tr></table></figure>
+
+<h4 id="配置-Dante（编辑配置文件）"><a href="#配置-Dante（编辑配置文件）" class="headerlink" title="配置 Dante（编辑配置文件）"></a>配置 Dante（编辑配置文件）</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">logoutput: /var/log/danted.log</span><br><span class="line"></span><br><span class="line">internal: 0.0.0.0 port = 1080</span><br><span class="line">external: 23.27.168.239</span><br><span class="line"></span><br><span class="line">socksmethod: username</span><br><span class="line">user.notprivileged: nobody</span><br><span class="line"></span><br><span class="line">client pass &#123;</span><br><span class="line">    from: 0.0.0.0/0 to: 0.0.0.0/0</span><br><span class="line">    log: connect disconnect</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">socks pass &#123;</span><br><span class="line">    from: 0.0.0.0/0 to: 0.0.0.0/0</span><br><span class="line">    protocol: tcp udp</span><br><span class="line">    log: connect disconnect</span><br><span class="line">    command: bind connect udpassociate</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>修改了 &#x2F;etc&#x2F;danted.conf 配置文件，需要重启 danted</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl restart danted</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：<code>external</code> 需根据实际网卡名修改，可用 <code>ip addr</code> 查看。</p>
+</blockquote>
+<h4 id="添加用户并设置密码"><a href="#添加用户并设置密码" class="headerlink" title="添加用户并设置密码"></a>添加用户并设置密码</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> useradd -M -s /usr/sbin/nologin user2</span><br><span class="line"><span class="built_in">sudo</span> passwd user2</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#### 启动 Dante 服务</span></span><br><span class="line"></span><br><span class="line">```bash</span><br><span class="line"><span class="built_in">sudo</span> systemctl restart danted</span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> danted</span><br></pre></td></tr></table></figure>
+
+<h4 id="检查端口监听"><a href="#检查端口监听" class="headerlink" title="检查端口监听"></a>检查端口监听</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> netstat -tunlp | grep 1080</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="使用-Squid-搭建-HTTP-代理"><a href="#使用-Squid-搭建-HTTP-代理" class="headerlink" title="使用 Squid 搭建 HTTP 代理"></a>使用 Squid 搭建 HTTP 代理</h2><h4 id="安装-Squid"><a href="#安装-Squid" class="headerlink" title="安装 Squid"></a>安装 Squid</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"><span class="built_in">sudo</span> apt install squid</span><br></pre></td></tr></table></figure>
+
+<h4 id="配置-Squid（编辑配置文件）"><a href="#配置-Squid（编辑配置文件）" class="headerlink" title="配置 Squid（编辑配置文件）"></a>配置 Squid（编辑配置文件）</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http_port 3128</span><br><span class="line"></span><br><span class="line"># 允许所有内网访问（根据实际情况调整）</span><br><span class="line">acl localnet src 192.168.0.0/16</span><br><span class="line">http_access allow localnet</span><br><span class="line">http_access allow localhost</span><br><span class="line">http_access deny all</span><br></pre></td></tr></table></figure>
+
+<h4 id="启动-Squid-服务"><a href="#启动-Squid-服务" class="headerlink" title="启动 Squid 服务"></a>启动 Squid 服务</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl restart squid</span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> squid</span><br></pre></td></tr></table></figure>
+
+<h4 id="检查端口监听-1"><a href="#检查端口监听-1" class="headerlink" title="检查端口监听"></a>检查端口监听</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> netstat -tunlp | grep 3128</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="代理验证"><a href="#代理验证" class="headerlink" title="代理验证"></a>代理验证</h2><ul>
+<li>SOCKS5 代理可用 curl 测试：</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x socks5://adu:ADU908google@108.165.40.161:1080 http://ip-api.com/json</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>HTTP 代理可用 curl 测试：</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x http://127.0.0.1:3128 http://ip-api.com/json</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><ul>
+<li>防火墙未放行端口，需开放 1080（SOCKS5）或 3128（HTTP）端口。</li>
+<li>配置文件语法错误，建议每次修改后检查日志。</li>
+</ul>
+<hr>
+]]></content>
+      <categories>
+        <category>Linux</category>
+        <category>网络代理</category>
+      </categories>
+      <tags>
+        <tag>Ubuntu</tag>
+        <tag>SOCKS5</tag>
+        <tag>HTTP代理</tag>
+        <tag>Dante</tag>
+        <tag>Squid</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Ubuntu/Debian 服务器安装 Docker 基础环境（脚本化）</title>
+    <url>/2026/05/09/ubuntu%E5%AE%89%E8%A3%85docker%E5%92%8Cdocker%20compose%E8%84%9A%E6%9C%AC/</url>
+    <content><![CDATA[<blockquote>
+<p>这篇文档将原始安装脚本整理为可执行的服务器部署手册，用于在 Debian&#x2F;Ubuntu 上快速安装 Docker Engine 与 Docker Compose 插件。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="1-适用范围"><a href="#1-适用范围" class="headerlink" title="1. 适用范围"></a>1. 适用范围</h2><ul>
+<li>系统：Debian &#x2F; Ubuntu</li>
+<li>场景：新机器初始化、容器宿主机准备</li>
+<li>权限：需要 <code>root</code>（或 <code>sudo</code>）</li>
+</ul>
+<h2 id="2-前置检查"><a href="#2-前置检查" class="headerlink" title="2. 前置检查"></a>2. 前置检查</h2><p>执行安装前，建议先确认以下信息：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cat /etc/os-release</span><br><span class="line">uname -m</span><br><span class="line">df -h</span><br></pre></td></tr></table></figure>
+
+<p>说明：</p>
+<ul>
+<li><code>os-release</code>：确认是否 Debian&#x2F;Ubuntu</li>
+<li><code>uname -m</code>：确认架构（如 <code>amd64</code> &#x2F; <code>arm64</code>）</li>
+<li><code>df -h</code>：确认磁盘空间是否充足</li>
+</ul>
+<h2 id="3-一键安装脚本"><a href="#3-一键安装脚本" class="headerlink" title="3. 一键安装脚本"></a>3. 一键安装脚本</h2><p>将以下内容保存为 <code>bootstrap-docker.sh</code>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> -e</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">log_info</span></span>() &#123;</span><br><span class="line">  <span class="built_in">echo</span> -e <span class="string">&quot;\033[32m[信息]\033[0m <span class="variable">$1</span>&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">log_error</span></span>() &#123;</span><br><span class="line">  <span class="built_in">echo</span> -e <span class="string">&quot;\033[31m[错误]\033[0m <span class="variable">$1</span>&quot;</span></span><br><span class="line">  <span class="built_in">exit</span> 1</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查是否以 root 用户运行</span></span><br><span class="line"><span class="keyword">if</span> [ <span class="string">&quot;<span class="subst">$(id -u)</span>&quot;</span> -ne 0 ]; <span class="keyword">then</span></span><br><span class="line">  log_error <span class="string">&quot;此脚本需要以 root 权限运行。请使用 &#x27;sudo ./bootstrap-docker.sh&#x27;&quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">log_info <span class="string">&quot;--- 开始准备 Docker 运行环境 ---&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 步骤 0: 检查操作系统</span></span><br><span class="line"><span class="keyword">if</span> [ -f /etc/os-release ]; <span class="keyword">then</span></span><br><span class="line">  . /etc/os-release</span><br><span class="line">  <span class="keyword">if</span> [[ <span class="string">&quot;<span class="variable">$ID</span>&quot;</span> != <span class="string">&quot;debian&quot;</span> &amp;&amp; <span class="string">&quot;<span class="variable">$ID</span>&quot;</span> != <span class="string">&quot;ubuntu&quot;</span> ]]; <span class="keyword">then</span></span><br><span class="line">    log_error <span class="string">&quot;此脚本目前仅为 Debian/Ubuntu 设计。检测到操作系统为: <span class="variable">$ID</span>&quot;</span></span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 步骤 1: 安装必要工具</span></span><br><span class="line">log_info <span class="string">&quot;正在更新 apt 包索引并安装基础工具...&quot;</span></span><br><span class="line">apt-get update</span><br><span class="line">apt-get install -y ca-certificates curl gnupg lsb-release</span><br><span class="line"></span><br><span class="line"><span class="comment"># 步骤 2: 安装 Docker Engine</span></span><br><span class="line"><span class="keyword">if</span> <span class="built_in">command</span> -v docker &gt;/dev/null 2&gt;&amp;1; <span class="keyword">then</span></span><br><span class="line">  log_info <span class="string">&quot;Docker 已安装，跳过安装步骤。&quot;</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  log_info <span class="string">&quot;正在安装 Docker Engine (官方推荐方式)...&quot;</span></span><br><span class="line"></span><br><span class="line">  keyrings_dir=<span class="string">&quot;/usr/share/keyrings&quot;</span></span><br><span class="line">  install -m 0755 -d <span class="string">&quot;<span class="variable">$keyrings_dir</span>&quot;</span></span><br><span class="line">  curl -fsSL <span class="string">&quot;https://download.docker.com/linux/<span class="variable">$&#123;ID&#125;</span>/gpg&quot;</span> | gpg --dearmor -o <span class="string">&quot;<span class="variable">$&#123;keyrings_dir&#125;</span>/docker-archive-keyring.gpg&quot;</span></span><br><span class="line">  <span class="built_in">chmod</span> a+r <span class="string">&quot;<span class="variable">$&#123;keyrings_dir&#125;</span>/docker-archive-keyring.gpg&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">echo</span> \</span><br><span class="line">    <span class="string">&quot;deb [arch=<span class="subst">$(dpkg --print-architecture)</span> signed-by=<span class="variable">$&#123;keyrings_dir&#125;</span>/docker-archive-keyring.gpg] https://download.docker.com/linux/<span class="variable">$&#123;ID&#125;</span> \</span></span><br><span class="line"><span class="string">    <span class="subst">$(lsb_release -cs)</span> stable&quot;</span> | \</span><br><span class="line">    <span class="built_in">tee</span> /etc/apt/sources.list.d/docker.list &gt; /dev/null</span><br><span class="line"></span><br><span class="line">  log_info <span class="string">&quot;正在更新包索引并安装 Docker...&quot;</span></span><br><span class="line">  apt-get update</span><br><span class="line">  apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin</span><br><span class="line"></span><br><span class="line">  log_info <span class="string">&quot;Docker 安装成功。&quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 步骤 3: 验证 Docker Compose</span></span><br><span class="line"><span class="keyword">if</span> ! docker compose version &gt;/dev/null 2&gt;&amp;1; <span class="keyword">then</span></span><br><span class="line">  log_error <span class="string">&quot;Docker Compose 插件安装失败或未找到。&quot;</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  log_info <span class="string">&quot;Docker Compose 插件已成功安装并验证。&quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">log_info <span class="string">&quot;================ 环境准备完成 ================&quot;</span></span><br><span class="line">log_info <span class="string">&quot;Docker 宿主环境已就绪。&quot;</span></span><br><span class="line"><span class="built_in">exit</span> 0</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-执行方式"><a href="#4-执行方式" class="headerlink" title="4. 执行方式"></a>4. 执行方式</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">chmod +x bootstrap-docker.sh</span><br><span class="line">sudo ./bootstrap-docker.sh</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-安装完成后验证"><a href="#5-安装完成后验证" class="headerlink" title="5. 安装完成后验证"></a>5. 安装完成后验证</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker --version</span><br><span class="line">docker compose version</span><br><span class="line">systemctl status docker --no-pager</span><br></pre></td></tr></table></figure>
+
+<p>可选功能验证：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker run --rm hello-world</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-脚本做了什么"><a href="#6-脚本做了什么" class="headerlink" title="6. 脚本做了什么"></a>6. 脚本做了什么</h2><ul>
+<li>自动检查是否 <code>root</code> 执行，避免权限不足</li>
+<li>自动识别 Debian&#x2F;Ubuntu，非目标系统直接退出</li>
+<li>安装基础依赖：<code>ca-certificates</code>、<code>curl</code>、<code>gnupg</code>、<code>lsb-release</code></li>
+<li>添加 Docker 官方 GPG key 与 APT 源</li>
+<li>安装组件：Docker Engine、CLI、containerd、buildx、compose 插件</li>
+<li>安装后检查 <code>docker compose version</code>，失败立即提示</li>
+</ul>
+<h2 id="7-常见问题排查"><a href="#7-常见问题排查" class="headerlink" title="7. 常见问题排查"></a>7. 常见问题排查</h2><h3 id="7-1-Permission-denied-或-Got-permission-denied-while-trying-to-connect-to-the-Docker-daemon"><a href="#7-1-Permission-denied-或-Got-permission-denied-while-trying-to-connect-to-the-Docker-daemon" class="headerlink" title="7.1 Permission denied 或 Got permission denied while trying to connect to the Docker daemon"></a>7.1 <code>Permission denied</code> 或 <code>Got permission denied while trying to connect to the Docker daemon</code></h3><p>先确认是否使用 <code>sudo</code> 执行，或把当前用户加入 <code>docker</code> 组：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo usermod -aG docker $USER</span><br><span class="line">newgrp docker</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-2-Could-not-resolve-下载超时"><a href="#7-2-Could-not-resolve-下载超时" class="headerlink" title="7.2 Could not resolve &#x2F; 下载超时"></a>7.2 <code>Could not resolve</code> &#x2F; 下载超时</h3><p>说明网络或 DNS 异常，先检查连通性：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">curl -I https://download.docker.com</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-3-Package-has-no-installation-candidate"><a href="#7-3-Package-has-no-installation-candidate" class="headerlink" title="7.3 Package has no installation candidate"></a>7.3 <code>Package has no installation candidate</code></h3><p>通常是源未正确写入或 <code>apt-get update</code> 未成功，建议重新执行：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-cache policy docker-ce</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-上线前检查清单"><a href="#8-上线前检查清单" class="headerlink" title="8. 上线前检查清单"></a>8. 上线前检查清单</h2><ul>
+<li><input disabled="" type="checkbox"> 系统版本确认是 Debian&#x2F;Ubuntu</li>
+<li><input disabled="" type="checkbox"> Docker 与 Docker Compose 版本正常输出</li>
+<li><input disabled="" type="checkbox"> <code>docker run hello-world</code> 通过</li>
+<li><input disabled="" type="checkbox"> 防火墙与安全组策略满足业务端口要求</li>
+<li><input disabled="" type="checkbox"> 镜像仓库访问策略（公网&#x2F;代理）确认完成</li>
+</ul>
+]]></content>
+      <categories>
+        <category>容器与虚拟化</category>
+        <category>运维部署</category>
+      </categories>
+      <tags>
+        <tag>Ubuntu</tag>
+        <tag>Docker</tag>
+        <tag>Debian</tag>
+        <tag>Docker Compose</tag>
+        <tag>Shell</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ubuntu安装mysql</title>
+    <url>/2025/02/10/ubuntu%E5%AE%89%E8%A3%85mysql/</url>
+    <content><![CDATA[<blockquote>
+<p>本文介绍如何在ubuntu上安装mysql</p>
+</blockquote>
+<span id="more"></span>
+
+
+<h4 id="1-更新apt-get源"><a href="#1-更新apt-get源" class="headerlink" title="1. 更新apt-get源"></a>1. 更新apt-get源</h4><p>首先，确保你的系统包列表是最新的</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt-get update</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-安装mysql"><a href="#2-安装mysql" class="headerlink" title="2. 安装mysql"></a>2. 安装mysql</h4><p>运行以下命令安装MySQL服务器</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt-get install mysql-server</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-启动并启用MySQL服务"><a href="#3-启动并启用MySQL服务" class="headerlink" title="3. 启动并启用MySQL服务"></a>3. 启动并启用MySQL服务</h4><p>安装完成后，MySQL服务会自动启动。你可以通过以下命令检查其状态</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl status mysql</span><br></pre></td></tr></table></figure>
+<p>如果MySQL没有自动启动，可以使用以下命令启动它</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl start mysql</span><br></pre></td></tr></table></figure>
+<p>为了让MySQL在系统启动时自动运行，启用它</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> mysql</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-运行安全脚本（推荐）"><a href="#4-运行安全脚本（推荐）" class="headerlink" title="4. 运行安全脚本（推荐）"></a>4. 运行安全脚本（推荐）</h4><p>MySQL安装后，建议运行安全脚本来设置root密码并提高安全性</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> mysql_secure_installation</span><br></pre></td></tr></table></figure>
+<ol>
+<li>按照提示完成以下操作：</li>
+<li>设置root用户的密码。</li>
+<li>移除匿名用户。</li>
+<li>禁止远程root登录。</li>
+<li>删除测试数据库。</li>
+<li>重新加载权限表。</li>
+</ol>
+<h4 id="5-登录MySQL"><a href="#5-登录MySQL" class="headerlink" title="5. 登录MySQL"></a>5. 登录MySQL</h4><p>安装完成后，可以使用以下命令登录MySQL</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mysql -u root -p</span><br></pre></td></tr></table></figure>
+<p>输入你设置的root密码即可进入MySQL命令行</p>
+<h4 id="6-配置远程访问（可选）"><a href="#6-配置远程访问（可选）" class="headerlink" title="6. 配置远程访问（可选）"></a>6. 配置远程访问（可选）</h4><p>如果需要从远程访问MySQL，需要修改MySQL配置文件并授权远程用户。</p>
+<h5 id="6-1-修改配置文件"><a href="#6-1-修改配置文件" class="headerlink" title="6.1 修改配置文件"></a>6.1 修改配置文件</h5><p>编辑MySQL配置文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> nano /etc/mysql/mysql.conf.d/mysqld.cnf</span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"># 以下是mysqld.cnf文件的示例</span><br><span class="line">[mysqld]</span><br><span class="line">bind<span class="operator">-</span>address <span class="operator">=</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line">port <span class="operator">=</span> <span class="number">3307</span></span><br></pre></td></tr></table></figure>
+<p>找到bind-address行，将其值从127.0.0.1改为0.0.0.0（允许所有IP访问）或指定允许访问的IP地址。<br>保存并退出，然后重启MySQL服务。要修改端口号，可以在配置文件中找到port行，将其值改为你想要的端口号。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl restart mysql</span><br></pre></td></tr></table></figure>
+<p>如果无法远程访问，执行如下命令</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">UPDATE mysql.user SET host=<span class="string">&#x27;%&#x27;</span> WHERE user=<span class="string">&#x27;root&#x27;</span>;</span><br><span class="line">FLUSH PRIVILEGES;</span><br></pre></td></tr></table></figure>
+<h5 id="6-2-授权远程用户"><a href="#6-2-授权远程用户" class="headerlink" title="6.2 授权远程用户"></a>6.2 授权远程用户</h5><p>登录MySQL后，运行以下命令授权远程访问：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;username&#x27;</span>@<span class="string">&#x27;%&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;password&#x27;</span>;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;username&#x27;</span>@<span class="string">&#x27;%&#x27;</span> <span class="keyword">WITH</span> <span class="keyword">GRANT</span> OPTION;</span><br><span class="line">FLUSH PRIVILEGES;</span><br></pre></td></tr></table></figure>
+<p>将username和password替换为你想要的用户名和密码。</p>
+<h4 id="7-测试MySQL"><a href="#7-测试MySQL" class="headerlink" title="7. 测试MySQL"></a>7. 测试MySQL</h4><p>安装完成后，可以通过以下命令测试MySQL是否正常运行：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mysql -u root -p -e <span class="string">&quot;SHOW DATABASES;&quot;</span></span><br></pre></td></tr></table></figure>
+<p>如果显示数据库列表，说明MySQL安装成功。</p>
+<h4 id="8-卸载MySQL（可选）"><a href="#8-卸载MySQL（可选）" class="headerlink" title="8. 卸载MySQL（可选）"></a>8. 卸载MySQL（可选）</h4><p>   如果需要卸载MySQL，可以运行以下命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt remove --purge mysql-server mysql-client mysql-common</span><br><span class="line"><span class="built_in">sudo</span> apt autoremove</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">rm</span> -rf /etc/mysql /var/lib/mysql</span><br></pre></td></tr></table></figure>
+<p>通过以上步骤，你应该可以在Ubuntu上成功安装并配置MySQL。如果有任何问题，请检查日志文件（&#x2F;var&#x2F;log&#x2F;mysql&#x2F;error.log）以获取更多信息。</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+        <category>运维部署</category>
+      </categories>
+      <tags>
+        <tag>Ubuntu</tag>
+        <tag>MySQL</tag>
+        <tag>安装教程</tag>
+        <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ubuntu安装rabbitMQ</title>
+    <url>/2025/02/09/ubuntu%E5%AE%89%E8%A3%85rabbitMQ/</url>
+    <content><![CDATA[<blockquote>
+<p>ubuntu安装rabbitMQ</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="安装RabbitMQ"><a href="#安装RabbitMQ" class="headerlink" title="安装RabbitMQ"></a>安装RabbitMQ</h3><h4 id="更新软件包列表"><a href="#更新软件包列表" class="headerlink" title="更新软件包列表"></a>更新软件包列表</h4><p>首先，确保系统包列表是最新的</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt update</span><br></pre></td></tr></table></figure>
+
+<h4 id="安装-Erlang（RabbitMQ-的依赖项）"><a href="#安装-Erlang（RabbitMQ-的依赖项）" class="headerlink" title="安装 Erlang（RabbitMQ 的依赖项）"></a>安装 Erlang（RabbitMQ 的依赖项）</h4><p>RabbitMQ 是使用 Erlang 编写的，因此需要安装 Erlang</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt install erlang</span><br></pre></td></tr></table></figure>
+
+<h4 id="添加-RabbitMQ-仓库"><a href="#添加-RabbitMQ-仓库" class="headerlink" title="添加 RabbitMQ 仓库"></a>添加 RabbitMQ 仓库</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">echo &quot;deb https://dl.bintray.com/rabbitmq/debian bionic main&quot; | sudo tee /etc/apt/sources.list.d/bintray.rabbitmq.list</span><br></pre></td></tr></table></figure>
+
+<p>添加 RabbitMQ 公钥</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc | sudo apt-key add -</span><br></pre></td></tr></table></figure>
+
+<p>再次更新软件包列表</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt update</span><br></pre></td></tr></table></figure>
+
+<h4 id="安装-RabbitMQ"><a href="#安装-RabbitMQ" class="headerlink" title="安装 RabbitMQ"></a>安装 RabbitMQ</h4><p>使用以下命令安装 RabbitMQ</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt install rabbitmq-server</span><br></pre></td></tr></table></figure>
+
+<h4 id="启用并启动-RabbitMQ-服务"><a href="#启用并启动-RabbitMQ-服务" class="headerlink" title="启用并启动 RabbitMQ 服务"></a>启用并启动 RabbitMQ 服务</h4><p>启用 RabbitMQ 服务并在系统启动时启动它</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo systemctl enable rabbitmq-server</span><br><span class="line">sudo systemctl start rabbitmq-server</span><br></pre></td></tr></table></figure>
+
+<h4 id="检查-RabbitMQ-的状态"><a href="#检查-RabbitMQ-的状态" class="headerlink" title="检查 RabbitMQ 的状态"></a>检查 RabbitMQ 的状态</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo systemctl status rabbitmq-server</span><br></pre></td></tr></table></figure>
+
+<h4 id="启用RabbitMQ管理插件"><a href="#启用RabbitMQ管理插件" class="headerlink" title="启用RabbitMQ管理插件"></a>启用RabbitMQ管理插件</h4><p>RabbitMQ提供了一个Web管理界面，可以通过以下命令启用：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo rabbitmq-plugins enable rabbitmq_management</span><br></pre></td></tr></table></figure>
+
+<h4 id="设置-RabbitMQ-的管理用户"><a href="#设置-RabbitMQ-的管理用户" class="headerlink" title="设置 RabbitMQ 的管理用户"></a>设置 RabbitMQ 的管理用户</h4><p>使用以下命令设置 RabbitMQ 的管理用户</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo rabbitmqctl add_user admin password</span><br></pre></td></tr></table></figure>
+
+<p>设置用户标签</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo rabbitmqctl set_user_tags admin administrator</span><br></pre></td></tr></table></figure>
+
+<p>设置权限</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo rabbitmqctl set_permissions -p / admin &quot;.*&quot; &quot;.*&quot; &quot;.*&quot;</span><br></pre></td></tr></table></figure>
+
+<h4 id="修改-RabbitMQ-端口号"><a href="#修改-RabbitMQ-端口号" class="headerlink" title="修改 RabbitMQ 端口号"></a>修改 RabbitMQ 端口号</h4><p>默认情况下，RabbitMQ 使用 5672 端口。如果需要更改端口号，请编辑配置文件</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo nano /etc/rabbitmq/rabbitmq.conf</span><br></pre></td></tr></table></figure>
+
+<p>在文件中添加以下行，将端口号更改为 5673</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">监听端口</span></span><br><span class="line">listeners.tcp.port = 5673</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">管理界面端口</span></span><br><span class="line">management.tcp.port = 15673</span><br></pre></td></tr></table></figure>
+
+<p>通过以上步骤，您将在 Ubuntu 系统上安装并运行 RabbitMQ。</p>
+]]></content>
+      <categories>
+        <category>消息中间件</category>
+        <category>运维部署</category>
+      </categories>
+      <tags>
+        <tag>Ubuntu</tag>
+        <tag>RabbitMQ</tag>
+        <tag>安装教程</tag>
+        <tag>消息队列</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ubuntu安装redis</title>
+    <url>/2025/02/09/ubuntu%E5%AE%89%E8%A3%85redis/</url>
+    <content><![CDATA[<blockquote>
+<p>ubuntu安装redis</p>
+</blockquote>
+<span id="more"></span>
+
+<h4 id="安装redis"><a href="#安装redis" class="headerlink" title="安装redis"></a>安装redis</h4><h4 id="1-更新系统包列表"><a href="#1-更新系统包列表" class="headerlink" title="1. 更新系统包列表"></a>1. 更新系统包列表</h4><p>首先，确保系统包列表是最新的：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt update</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-安装Redis"><a href="#2-安装Redis" class="headerlink" title="2. 安装Redis"></a>2. 安装Redis</h4><p>使用以下命令安装Redis：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt install redis-server</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-启动Redis服务"><a href="#3-启动Redis服务" class="headerlink" title="3. 启动Redis服务"></a>3. 启动Redis服务</h4><p>安装完成后，Redis服务会自动启动。可以使用以下命令来检查Redis服务的状态：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo systemctl status redis-server</span><br></pre></td></tr></table></figure>
+<p>如果服务没有自动启动，可以手动启动它：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo systemctl start redis-server</span><br></pre></td></tr></table></figure>
+<h4 id="4-设置Redis开机自启"><a href="#4-设置Redis开机自启" class="headerlink" title="4. 设置Redis开机自启"></a>4. 设置Redis开机自启</h4><p>为了确保Redis在系统启动时自动启动，可以启用它的自启动：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo systemctl enable redis-server</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-测试Redis"><a href="#5-测试Redis" class="headerlink" title="5. 测试Redis"></a>5. 测试Redis</h4><p>可以使用Redis自带的命令行工具redis-cli来测试Redis是否正常工作：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">redis-cli</span><br></pre></td></tr></table></figure>
+<p>在Redis命令行中，输入ping，如果返回PONG，说明Redis工作正常：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ping</span><br><span class="line">PONG</span><br></pre></td></tr></table></figure>
+<p>PONG</p>
+<h4 id="6-配置Redis（可选）"><a href="#6-配置Redis（可选）" class="headerlink" title="6. 配置Redis（可选）"></a>6. 配置Redis（可选）</h4><p>Redis的配置文件位于&#x2F;etc&#x2F;redis&#x2F;redis.conf。可以根据需要编辑此文件来更改Redis的配置。例如，你可以更改绑定的IP地址、端口号、设置密码等。</p>
+<p>编辑配置文件：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo nano /etc/redis/redis.conf</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>默认情况下，Redis只允许本地访问。如果需要从远程访问Redis，可以编辑配置文件&#x2F;etc&#x2F;redis&#x2F;redis.conf<br>找到bind，将其注释掉：</p>
+  <figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="comment"># bind 127.0.0.1</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>关闭保护，找到protected-mode，将其改为no：</p>
+  <figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">protected</span>-mode no</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改端口，找到port，将其改为你想要的端口号：</p>
+  <figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">port</span> <span class="number">6379</span></span><br></pre></td></tr></table></figure></li>
+<li><p>设置密码，找到requirepass，将其改为你想要的密码：</p>
+  <figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">requirepass</span> yourpassword</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>修改后，重启Redis服务以使更改生效：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo systemctl restart redis-server</span><br></pre></td></tr></table></figure>
+
+<h4 id="7-防火墙配置（可选）"><a href="#7-防火墙配置（可选）" class="headerlink" title="7. 防火墙配置（可选）"></a>7. 防火墙配置（可选）</h4><p>如果服务器启用了防火墙，你需要允许Redis的端口（默认是6379）通过防火墙：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo ufw allow 6379/tcp</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="8-卸载Redis（可选）"><a href="#8-卸载Redis（可选）" class="headerlink" title="8. 卸载Redis（可选）"></a>8. 卸载Redis（可选）</h4><p>如果不再需要Redis，可以使用以下命令卸载它：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt remove --purge redis-server</span><br></pre></td></tr></table></figure>
+<p>这将删除Redis及其配置文件。</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+        <category>运维部署</category>
+      </categories>
+      <tags>
+        <tag>Ubuntu</tag>
+        <tag>Redis</tag>
+        <tag>安装教程</tag>
+        <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Ubuntu/Debian 系统登录 GitHub GHCR</title>
+    <url>/2026/05/09/ubuntu%E9%85%8D%E7%BD%AEGHCR%E7%9B%B8%E5%85%B3%E4%BF%A1%E6%81%AF/</url>
+    <content><![CDATA[<blockquote>
+<p>记录在 Ubuntu &#x2F; Debian 系统中登录 GitHub Container Registry（GHCR）的完整流程，包含拉取、推送与常见报错排查。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="1-前置条件"><a href="#1-前置条件" class="headerlink" title="1. 前置条件"></a>1. 前置条件</h2><p>在开始前，请确认：</p>
+<ul>
+<li>已安装 Docker（<code>docker --version</code> 可正常输出）</li>
+<li>有 GitHub 账号</li>
+<li>已创建可用于 GHCR 的 Personal Access Token（PAT）</li>
+</ul>
+<p>可先检查环境：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker --version</span><br><span class="line">whoami</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-创建-GitHub-PAT（关键）"><a href="#2-创建-GitHub-PAT（关键）" class="headerlink" title="2. 创建 GitHub PAT（关键）"></a>2. 创建 GitHub PAT（关键）</h2><p>GHCR 推荐使用 <strong>PAT</strong> 登录，而不是账号密码。</p>
+<ol>
+<li>打开 GitHub：<code>Settings</code> -&gt; <code>Developer settings</code> -&gt; <code>Personal access tokens</code></li>
+<li>建议创建 <strong>Fine-grained token</strong>（或使用 classic token）</li>
+<li>至少授予以下权限（按需选择）：<ul>
+<li>拉取镜像：<code>read:packages</code></li>
+<li>推送镜像：<code>write:packages</code></li>
+<li>删除镜像：<code>delete:packages</code>（可选）</li>
+</ul>
+</li>
+<li>复制并妥善保存 Token（页面关闭后通常无法再次完整查看）</li>
+</ol>
+<h2 id="3-登录-GHCR"><a href="#3-登录-GHCR" class="headerlink" title="3. 登录 GHCR"></a>3. 登录 GHCR</h2><p>建议使用 <code>--password-stdin</code>，避免 Token 出现在命令历史中。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">echo &quot;YOUR_GITHUB_TOKEN&quot; | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin</span><br></pre></td></tr></table></figure>
+
+<p>示例（将用户名和 token 替换为你自己的）：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">echo &quot;ghp_xxxxxxxxxxxxxxxxxxxx&quot; | docker login ghcr.io -u hansonong --password-stdin</span><br></pre></td></tr></table></figure>
+
+<p>登录成功会输出：<code>Login Succeeded</code>。</p>
+<h2 id="4-验证是否可拉取-GHCR-镜像"><a href="#4-验证是否可拉取-GHCR-镜像" class="headerlink" title="4. 验证是否可拉取 GHCR 镜像"></a>4. 验证是否可拉取 GHCR 镜像</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker pull ghcr.io/OWNER/IMAGE:TAG</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker pull ghcr.io/octocat/hello-world:latest</span><br></pre></td></tr></table></figure>
+
+<p>如果是私有镜像，请确保当前 Token 对该仓库有访问权限。</p>
+<h2 id="5-推送镜像到-GHCR（可选）"><a href="#5-推送镜像到-GHCR（可选）" class="headerlink" title="5. 推送镜像到 GHCR（可选）"></a>5. 推送镜像到 GHCR（可选）</h2><h3 id="5-1-给本地镜像打-GHCR-标签"><a href="#5-1-给本地镜像打-GHCR-标签" class="headerlink" title="5.1 给本地镜像打 GHCR 标签"></a>5.1 给本地镜像打 GHCR 标签</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker tag local-image:latest ghcr.io/YOUR_GITHUB_USERNAME/local-image:latest</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-推送"><a href="#5-2-推送" class="headerlink" title="5.2 推送"></a>5.2 推送</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker push ghcr.io/YOUR_GITHUB_USERNAME/local-image:latest</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>提示：部分仓库可能要求镜像命名与仓库策略一致，推送失败时先检查仓库权限与命名规则。</p>
+</blockquote>
+<h2 id="6-退出登录与清理凭据"><a href="#6-退出登录与清理凭据" class="headerlink" title="6. 退出登录与清理凭据"></a>6. 退出登录与清理凭据</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker logout ghcr.io</span><br></pre></td></tr></table></figure>
+
+<p>如需进一步清理本机凭据，可检查 Docker 配置文件：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cat ~/.docker/config.json</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-常见报错与排查"><a href="#7-常见报错与排查" class="headerlink" title="7. 常见报错与排查"></a>7. 常见报错与排查</h2><h3 id="7-1-unauthorized-authentication-required"><a href="#7-1-unauthorized-authentication-required" class="headerlink" title="7.1 unauthorized &#x2F; authentication required"></a>7.1 <code>unauthorized</code> &#x2F; <code>authentication required</code></h3><p>常见原因：</p>
+<ul>
+<li>用户名写错（必须是 GitHub 用户名，不是邮箱）</li>
+<li>Token 无效、过期或复制不完整</li>
+<li>使用了账号密码而非 PAT</li>
+</ul>
+<p>建议处理：重新生成 Token，并用 <code>--password-stdin</code> 重新登录。</p>
+<h3 id="7-2-denied-permission-denied-或-403-Forbidden"><a href="#7-2-denied-permission-denied-或-403-Forbidden" class="headerlink" title="7.2 denied: permission denied 或 403 Forbidden"></a>7.2 <code>denied: permission denied</code> 或 <code>403 Forbidden</code></h3><p>常见原因：</p>
+<ul>
+<li>Token 权限不够（缺少 <code>write:packages</code> 或 <code>read:packages</code>）</li>
+<li>对目标组织&#x2F;仓库无访问权限</li>
+</ul>
+<p>建议处理：补齐权限并确认仓库可见性（public&#x2F;private）与组织策略。</p>
+<h3 id="7-3-网络超时-TLS-相关错误"><a href="#7-3-网络超时-TLS-相关错误" class="headerlink" title="7.3 网络超时 &#x2F; TLS 相关错误"></a>7.3 网络超时 &#x2F; TLS 相关错误</h3><p>常见原因：</p>
+<ul>
+<li>DNS 或网络代理配置异常</li>
+<li>服务器时间不正确导致 TLS 校验失败</li>
+</ul>
+<p>建议处理：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">curl -I https://ghcr.io</span><br></pre></td></tr></table></figure>
+
+<p>若请求失败，先排查网络连通性、代理配置和系统时间。</p>
+<h2 id="8-安全建议"><a href="#8-安全建议" class="headerlink" title="8. 安全建议"></a>8. 安全建议</h2><ul>
+<li>Token 遵循最小权限原则，只给必要 scope</li>
+<li>不要把 Token 写入脚本明文或提交到 Git 仓库</li>
+<li>定期轮换 Token</li>
+<li>在共享主机上使用后及时 <code>docker logout ghcr.io</code></li>
+</ul>
+]]></content>
+      <categories>
+        <category>容器与虚拟化</category>
+        <category>运维部署</category>
+      </categories>
+      <tags>
+        <tag>Ubuntu</tag>
+        <tag>Docker</tag>
+        <tag>Debian</tag>
+        <tag>GHCR</tag>
+        <tag>GitHub</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>wget拉取网页源码</title>
+    <url>/2024/06/10/wget%E6%8B%89%E5%8F%96%E7%BD%91%E9%A1%B5%E6%BA%90%E7%A0%81/</url>
+    <content><![CDATA[<p>在开发或运维过程中，经常需要获取网页的源代码。<code>wget</code> 是一个常用的命令行工具，可以方便地拉取网页源码。</p>
+<span id="more"></span>
+
+<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>使用 <code>wget</code> 拉取网页源码的基本命令如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget https://example.com</span><br></pre></td></tr></table></figure>
+
+<p>该命令会将网页源码保存为当前目录下的 <code>index.html</code> 文件。</p>
+<h2 id="保存为指定文件名"><a href="#保存为指定文件名" class="headerlink" title="保存为指定文件名"></a>保存为指定文件名</h2><p>可以使用 <code>-O</code> 参数指定保存的文件名：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget -O mypage.html https://example.com</span><br></pre></td></tr></table></figure>
+
+<h2 id="拉取带有-User-Agent-的网页"><a href="#拉取带有-User-Agent-的网页" class="headerlink" title="拉取带有 User-Agent 的网页"></a>拉取带有 User-Agent 的网页</h2><p>有些网站会校验 User-Agent，可以通过 <code>--user-agent</code> 参数指定：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget --user-agent=<span class="string">&quot;Mozilla/5.0&quot;</span> https://example.com</span><br></pre></td></tr></table></figure>
+
+<h2 id="递归下载整个网站"><a href="#递归下载整个网站" class="headerlink" title="递归下载整个网站"></a>递归下载整个网站</h2><p>如果需要下载整个网站，可以加上 <code>-r</code> 参数：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget -r https://example.com</span><br></pre></td></tr></table></figure>
+
+<h2 id="完整下载"><a href="#完整下载" class="headerlink" title="完整下载"></a>完整下载</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget --mirror --convert-links --adjust-extension --page-requisites --no-parent http://www.tengfenwujin.com/</span><br></pre></td></tr></table></figure>
+<ul>
+<li>–mirror：开启镜像下载，相当于 -r -N -l inf –no-remove-listing，会递归下载整个网站。</li>
+<li>–convert-links：下载后转换页面中的链接，使本地浏览时链接有效。</li>
+<li>–adjust-extension：自动调整保存文件的扩展名（如 .html）。</li>
+<li>–page-requisites：下载显示网页所需的所有资源（如图片、CSS、JS）。</li>
+<li>–no-parent：不下载父目录的内容，只下载指定目录及其子目录。</li>
+<li><code>http://www.tengfenwujin.com/</code>：目标网站地址。</li>
+</ul>
+<p>该命令用于完整镜像一个网站到本地，保证本地浏览时页面和资源都能正常显示。</p>
+<h2 id="常用参数说明"><a href="#常用参数说明" class="headerlink" title="常用参数说明"></a>常用参数说明</h2><ul>
+<li>`-O <file>`：指定输出文件名</li>
+<li>`-r`：递归下载</li>
+<li>`–user-agent&#x3D;<agent>`：指定 User-Agent</li>
+<li>`-c`：断点续传</li>
+<li>`-q`：安静模式，不输出信息</li>
+</ul>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ul>
+<li><a href="https://www.gnu.org/software/wget/manual/wget.html">GNU Wget 官方文档</a></li>
+</ul>
+<pre><code>
+</code></pre>
+]]></content>
+      <categories>
+        <category>工具教程</category>
+      </categories>
+      <tags>
+        <tag>wget</tag>
+        <tag>工具</tag>
+        <tag>网络</tag>
+      </tags>
+  </entry>
+</search>

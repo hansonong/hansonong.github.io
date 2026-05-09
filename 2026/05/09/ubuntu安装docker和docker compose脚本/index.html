@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#CD5C5C"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/snake.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/snake.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/snake.png">
+  <link rel="mask-icon" href="/images/snake.png" color="#CD5C5C">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"topnoah.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.22.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":true,"show_result":true,"line_number":true,"style":"mac"},"fold":{"enable":true,"height":500},"bookmark":{"enable":true,"color":"#008080","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="这篇文档将原始安装脚本整理为可执行的服务器部署手册，用于在 Debian&#x2F;Ubuntu 上快速安装 Docker Engine 与 Docker Compose 插件。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ubuntu&#x2F;Debian 服务器安装 Docker 基础环境（脚本化）">
+<meta property="og:url" content="https://topnoah.github.io/2026/05/09/ubuntu%E5%AE%89%E8%A3%85docker%E5%92%8Cdocker%20compose%E8%84%9A%E6%9C%AC/index.html">
+<meta property="og:site_name" content="HANSON ONG">
+<meta property="og:description" content="这篇文档将原始安装脚本整理为可执行的服务器部署手册，用于在 Debian&#x2F;Ubuntu 上快速安装 Docker Engine 与 Docker Compose 插件。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-05-09T06:03:04.624Z">
+<meta property="article:modified_time" content="2026-05-09T06:05:30.807Z">
+<meta property="article:author" content="hanson">
+<meta property="article:tag" content="Ubuntu">
+<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="Debian">
+<meta property="article:tag" content="Docker Compose">
+<meta property="article:tag" content="Shell">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://topnoah.github.io/2026/05/09/ubuntu%E5%AE%89%E8%A3%85docker%E5%92%8Cdocker%20compose%E8%84%9A%E6%9C%AC/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://topnoah.github.io/2026/05/09/ubuntu%E5%AE%89%E8%A3%85docker%E5%92%8Cdocker%20compose%E8%84%9A%E6%9C%AC/","path":"2026/05/09/ubuntu安装docker和docker compose脚本/","title":"Ubuntu/Debian 服务器安装 Docker 基础环境（脚本化）"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Ubuntu/Debian 服务器安装 Docker 基础环境（脚本化） | HANSON ONG</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">HANSON ONG</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-folder-open fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4"><span class="nav-number">1.</span> <span class="nav-text">1. 适用范围</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%89%8D%E7%BD%AE%E6%A3%80%E6%9F%A5"><span class="nav-number">2.</span> <span class="nav-text">2. 前置检查</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E4%B8%80%E9%94%AE%E5%AE%89%E8%A3%85%E8%84%9A%E6%9C%AC"><span class="nav-number">3.</span> <span class="nav-text">3. 一键安装脚本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">4. 执行方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%AE%89%E8%A3%85%E5%AE%8C%E6%88%90%E5%90%8E%E9%AA%8C%E8%AF%81"><span class="nav-number">5.</span> <span class="nav-text">5. 安装完成后验证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E8%84%9A%E6%9C%AC%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88"><span class="nav-number">6.</span> <span class="nav-text">6. 脚本做了什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5"><span class="nav-number">7.</span> <span class="nav-text">7. 常见问题排查</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-Permission-denied-%E6%88%96-Got-permission-denied-while-trying-to-connect-to-the-Docker-daemon"><span class="nav-number">7.1.</span> <span class="nav-text">7.1 Permission denied 或 Got permission denied while trying to connect to the Docker daemon</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-Could-not-resolve-%E4%B8%8B%E8%BD%BD%E8%B6%85%E6%97%B6"><span class="nav-number">7.2.</span> <span class="nav-text">7.2 Could not resolve &#x2F; 下载超时</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-3-Package-has-no-installation-candidate"><span class="nav-number">7.3.</span> <span class="nav-text">7.3 Package has no installation candidate</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E4%B8%8A%E7%BA%BF%E5%89%8D%E6%A3%80%E6%9F%A5%E6%B8%85%E5%8D%95"><span class="nav-number">8.</span> <span class="nav-text">8. 上线前检查清单</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">hanson</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">48</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://topnoah.github.io/2026/05/09/ubuntu%E5%AE%89%E8%A3%85docker%E5%92%8Cdocker%20compose%E8%84%9A%E6%9C%AC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="hanson">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HANSON ONG">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Ubuntu/Debian 服务器安装 Docker 基础环境（脚本化） | HANSON ONG">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Ubuntu/Debian 服务器安装 Docker 基础环境（脚本化）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2026-05-09 14:03:04 / 修改时间：14:05:30" itemprop="dateCreated datePublished" datetime="2026-05-09T14:03:04+08:00">2026-05-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AE%B9%E5%99%A8%E4%B8%8E%E8%99%9A%E6%8B%9F%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">容器与虚拟化</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AE%B9%E5%99%A8%E4%B8%8E%E8%99%9A%E6%8B%9F%E5%8C%96/%E8%BF%90%E7%BB%B4%E9%83%A8%E7%BD%B2/" itemprop="url" rel="index"><span itemprop="name">运维部署</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>这篇文档将原始安装脚本整理为可执行的服务器部署手册，用于在 Debian&#x2F;Ubuntu 上快速安装 Docker Engine 与 Docker Compose 插件。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="1-适用范围"><a href="#1-适用范围" class="headerlink" title="1. 适用范围"></a>1. 适用范围</h2><ul>
+<li>系统：Debian &#x2F; Ubuntu</li>
+<li>场景：新机器初始化、容器宿主机准备</li>
+<li>权限：需要 <code>root</code>（或 <code>sudo</code>）</li>
+</ul>
+<h2 id="2-前置检查"><a href="#2-前置检查" class="headerlink" title="2. 前置检查"></a>2. 前置检查</h2><p>执行安装前，建议先确认以下信息：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/os-release</span><br><span class="line">uname -m</span><br><span class="line">df -h</span><br></pre></td></tr></table></figure>
+
+<p>说明：</p>
+<ul>
+<li><code>os-release</code>：确认是否 Debian&#x2F;Ubuntu</li>
+<li><code>uname -m</code>：确认架构（如 <code>amd64</code> &#x2F; <code>arm64</code>）</li>
+<li><code>df -h</code>：确认磁盘空间是否充足</li>
+</ul>
+<h2 id="3-一键安装脚本"><a href="#3-一键安装脚本" class="headerlink" title="3. 一键安装脚本"></a>3. 一键安装脚本</h2><p>将以下内容保存为 <code>bootstrap-docker.sh</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> -e</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">log_info</span></span>() &#123;</span><br><span class="line">  <span class="built_in">echo</span> -e <span class="string">&quot;\033[32m[信息]\033[0m <span class="variable">$1</span>&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">log_error</span></span>() &#123;</span><br><span class="line">  <span class="built_in">echo</span> -e <span class="string">&quot;\033[31m[错误]\033[0m <span class="variable">$1</span>&quot;</span></span><br><span class="line">  <span class="built_in">exit</span> 1</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查是否以 root 用户运行</span></span><br><span class="line"><span class="keyword">if</span> [ <span class="string">&quot;<span class="subst">$(id -u)</span>&quot;</span> -ne 0 ]; <span class="keyword">then</span></span><br><span class="line">  log_error <span class="string">&quot;此脚本需要以 root 权限运行。请使用 &#x27;sudo ./bootstrap-docker.sh&#x27;&quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">log_info <span class="string">&quot;--- 开始准备 Docker 运行环境 ---&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 步骤 0: 检查操作系统</span></span><br><span class="line"><span class="keyword">if</span> [ -f /etc/os-release ]; <span class="keyword">then</span></span><br><span class="line">  . /etc/os-release</span><br><span class="line">  <span class="keyword">if</span> [[ <span class="string">&quot;<span class="variable">$ID</span>&quot;</span> != <span class="string">&quot;debian&quot;</span> &amp;&amp; <span class="string">&quot;<span class="variable">$ID</span>&quot;</span> != <span class="string">&quot;ubuntu&quot;</span> ]]; <span class="keyword">then</span></span><br><span class="line">    log_error <span class="string">&quot;此脚本目前仅为 Debian/Ubuntu 设计。检测到操作系统为: <span class="variable">$ID</span>&quot;</span></span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 步骤 1: 安装必要工具</span></span><br><span class="line">log_info <span class="string">&quot;正在更新 apt 包索引并安装基础工具...&quot;</span></span><br><span class="line">apt-get update</span><br><span class="line">apt-get install -y ca-certificates curl gnupg lsb-release</span><br><span class="line"></span><br><span class="line"><span class="comment"># 步骤 2: 安装 Docker Engine</span></span><br><span class="line"><span class="keyword">if</span> <span class="built_in">command</span> -v docker &gt;/dev/null 2&gt;&amp;1; <span class="keyword">then</span></span><br><span class="line">  log_info <span class="string">&quot;Docker 已安装，跳过安装步骤。&quot;</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  log_info <span class="string">&quot;正在安装 Docker Engine (官方推荐方式)...&quot;</span></span><br><span class="line"></span><br><span class="line">  keyrings_dir=<span class="string">&quot;/usr/share/keyrings&quot;</span></span><br><span class="line">  install -m 0755 -d <span class="string">&quot;<span class="variable">$keyrings_dir</span>&quot;</span></span><br><span class="line">  curl -fsSL <span class="string">&quot;https://download.docker.com/linux/<span class="variable">$&#123;ID&#125;</span>/gpg&quot;</span> | gpg --dearmor -o <span class="string">&quot;<span class="variable">$&#123;keyrings_dir&#125;</span>/docker-archive-keyring.gpg&quot;</span></span><br><span class="line">  <span class="built_in">chmod</span> a+r <span class="string">&quot;<span class="variable">$&#123;keyrings_dir&#125;</span>/docker-archive-keyring.gpg&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">echo</span> \</span><br><span class="line">    <span class="string">&quot;deb [arch=<span class="subst">$(dpkg --print-architecture)</span> signed-by=<span class="variable">$&#123;keyrings_dir&#125;</span>/docker-archive-keyring.gpg] https://download.docker.com/linux/<span class="variable">$&#123;ID&#125;</span> \</span></span><br><span class="line"><span class="string">    <span class="subst">$(lsb_release -cs)</span> stable&quot;</span> | \</span><br><span class="line">    <span class="built_in">tee</span> /etc/apt/sources.list.d/docker.list &gt; /dev/null</span><br><span class="line"></span><br><span class="line">  log_info <span class="string">&quot;正在更新包索引并安装 Docker...&quot;</span></span><br><span class="line">  apt-get update</span><br><span class="line">  apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin</span><br><span class="line"></span><br><span class="line">  log_info <span class="string">&quot;Docker 安装成功。&quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 步骤 3: 验证 Docker Compose</span></span><br><span class="line"><span class="keyword">if</span> ! docker compose version &gt;/dev/null 2&gt;&amp;1; <span class="keyword">then</span></span><br><span class="line">  log_error <span class="string">&quot;Docker Compose 插件安装失败或未找到。&quot;</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  log_info <span class="string">&quot;Docker Compose 插件已成功安装并验证。&quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">log_info <span class="string">&quot;================ 环境准备完成 ================&quot;</span></span><br><span class="line">log_info <span class="string">&quot;Docker 宿主环境已就绪。&quot;</span></span><br><span class="line"><span class="built_in">exit</span> 0</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-执行方式"><a href="#4-执行方式" class="headerlink" title="4. 执行方式"></a>4. 执行方式</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod +x bootstrap-docker.sh</span><br><span class="line">sudo ./bootstrap-docker.sh</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-安装完成后验证"><a href="#5-安装完成后验证" class="headerlink" title="5. 安装完成后验证"></a>5. 安装完成后验证</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker --version</span><br><span class="line">docker compose version</span><br><span class="line">systemctl status docker --no-pager</span><br></pre></td></tr></table></figure>
+
+<p>可选功能验证：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --rm hello-world</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-脚本做了什么"><a href="#6-脚本做了什么" class="headerlink" title="6. 脚本做了什么"></a>6. 脚本做了什么</h2><ul>
+<li>自动检查是否 <code>root</code> 执行，避免权限不足</li>
+<li>自动识别 Debian&#x2F;Ubuntu，非目标系统直接退出</li>
+<li>安装基础依赖：<code>ca-certificates</code>、<code>curl</code>、<code>gnupg</code>、<code>lsb-release</code></li>
+<li>添加 Docker 官方 GPG key 与 APT 源</li>
+<li>安装组件：Docker Engine、CLI、containerd、buildx、compose 插件</li>
+<li>安装后检查 <code>docker compose version</code>，失败立即提示</li>
+</ul>
+<h2 id="7-常见问题排查"><a href="#7-常见问题排查" class="headerlink" title="7. 常见问题排查"></a>7. 常见问题排查</h2><h3 id="7-1-Permission-denied-或-Got-permission-denied-while-trying-to-connect-to-the-Docker-daemon"><a href="#7-1-Permission-denied-或-Got-permission-denied-while-trying-to-connect-to-the-Docker-daemon" class="headerlink" title="7.1 Permission denied 或 Got permission denied while trying to connect to the Docker daemon"></a>7.1 <code>Permission denied</code> 或 <code>Got permission denied while trying to connect to the Docker daemon</code></h3><p>先确认是否使用 <code>sudo</code> 执行，或把当前用户加入 <code>docker</code> 组：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo usermod -aG docker $USER</span><br><span class="line">newgrp docker</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-2-Could-not-resolve-下载超时"><a href="#7-2-Could-not-resolve-下载超时" class="headerlink" title="7.2 Could not resolve &#x2F; 下载超时"></a>7.2 <code>Could not resolve</code> &#x2F; 下载超时</h3><p>说明网络或 DNS 异常，先检查连通性：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -I https://download.docker.com</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-3-Package-has-no-installation-candidate"><a href="#7-3-Package-has-no-installation-candidate" class="headerlink" title="7.3 Package has no installation candidate"></a>7.3 <code>Package has no installation candidate</code></h3><p>通常是源未正确写入或 <code>apt-get update</code> 未成功，建议重新执行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-cache policy docker-ce</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-上线前检查清单"><a href="#8-上线前检查清单" class="headerlink" title="8. 上线前检查清单"></a>8. 上线前检查清单</h2><ul>
+<li><input disabled="" type="checkbox"> 系统版本确认是 Debian&#x2F;Ubuntu</li>
+<li><input disabled="" type="checkbox"> Docker 与 Docker Compose 版本正常输出</li>
+<li><input disabled="" type="checkbox"> <code>docker run hello-world</code> 通过</li>
+<li><input disabled="" type="checkbox"> 防火墙与安全组策略满足业务端口要求</li>
+<li><input disabled="" type="checkbox"> 镜像仓库访问策略（公网&#x2F;代理）确认完成</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Ubuntu/" rel="tag"># Ubuntu</a>
+              <a href="/tags/Docker/" rel="tag"># Docker</a>
+              <a href="/tags/Debian/" rel="tag"># Debian</a>
+              <a href="/tags/Docker-Compose/" rel="tag"># Docker Compose</a>
+              <a href="/tags/Shell/" rel="tag"># Shell</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/05/09/ubuntu%E9%85%8D%E7%BD%AEGHCR%E7%9B%B8%E5%85%B3%E4%BF%A1%E6%81%AF/" rel="prev" title="Ubuntu/Debian 系统登录 GitHub GHCR">
+                  <i class="fa fa-angle-left"></i> Ubuntu/Debian 系统登录 GitHub GHCR
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">hanson</span>
+  </div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+-->
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
